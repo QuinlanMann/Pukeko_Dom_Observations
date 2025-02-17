@@ -60,7 +60,7 @@ list_of_objects <- lapply(list_of_objects,
 
 list2env(list_of_objects, .GlobalEnv)
 ```
-```{r}
+```{r Matrix Creation}
 # get names for row and columns
 matrix_maker<-function(x){
   # construct 0 matrix of correct dimensions with row and column names
@@ -73,28 +73,12 @@ matrix_maker<-function(x){
   myMat[as.matrix(x[c("Dominant", "Subordinate")])] <- x[["count"]]
   return(myMat)
 }
-matrixces<-lapply(list_of_objects, matrix_maker)
-
-matrixces$DS_EAST_CAMP_SE
-
-```
-
-```{r Matrix creation}
-MyFunc <- function(x) {
-  reshape2::dcast(data = x, formula = Dominant~Subordinate, value.var = "count")
-}
-list_of_objects <- lapply(X = list_of_objects, FUN = MyFunc)
-
-col2name<-function(x){
-  x<-x%>%
-   remove_rownames%>%
-    column_to_rownames(var = "Dominant")
-}
-
-list_of_objects<-lapply(list_of_objects, col2name)
-
-list_of_objects<-lapply(list_of_objects, function(x) replace(x, is.na(x), 0))
+list_of_objects<-lapply(list_of_objects, matrix_maker)
 
 list2env(list_of_objects, .GlobalEnv)
+```
+```{r David's Score Calculations}
+David_Score<-lapply(list_of_objects, EloRating::DS)
+
 ```
 
