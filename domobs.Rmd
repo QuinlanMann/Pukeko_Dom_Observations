@@ -60,6 +60,24 @@ list_of_objects <- lapply(list_of_objects,
 
 list2env(list_of_objects, .GlobalEnv)
 ```
+```{r}
+# get names for row and columns
+matrix_maker<-function(x){
+  # construct 0 matrix of correct dimensions with row and column names
+  myMat <- matrix(0, 
+                  length(sort(unique(unlist(x[1:2])))), 
+                  length(sort(unique(unlist(x[1:2])))), 
+                  dimnames = list(sort(unique(unlist(x[1:2]))), 
+                                  sort(unique(unlist(x[1:2])))))
+  # fill in the matrix with matrix indexing on row and column names
+  myMat[as.matrix(x[c("Dominant", "Subordinate")])] <- x[["count"]]
+  return(myMat)
+}
+matrixces<-lapply(list_of_objects, matrix_maker)
+
+matrixces$DS_EAST_CAMP_SE
+
+```
 
 ```{r Matrix creation}
 MyFunc <- function(x) {
