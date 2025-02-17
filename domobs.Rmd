@@ -37,12 +37,14 @@ library(tidyverse)
 library(reshape2)
 library(EloRating)
 library(RCurl)
+library(kableExtra)
+library(knitr)
 ```
 
 ## Creating Dataframes for each territory sampeled in 2011-12
 
 
-```{r Datafrmes, echo=FALSE}
+```{r Datafrmes,include=F, echo=FALSE}
 Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 Doms<-read.csv(text=Doms)
 
@@ -82,5 +84,10 @@ list2env(list_of_objects, .GlobalEnv)
 
 David_Score<-lapply(list_of_objects, EloRating::DS)
 David_Score<-bind_rows(David_Score, .id = "David_Score")
+```
+
+```{r}
+kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test") %>%
+  kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
