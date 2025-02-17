@@ -60,7 +60,7 @@ list_of_objects <- lapply(list_of_objects,
 
 list2env(list_of_objects, .GlobalEnv)
 ```
-```{r Matrix Creation}
+```{r Matrix Creation, include=F}
 # get names for row and columns
 matrix_maker<-function(x){
   # construct 0 matrix of correct dimensions with row and column names
@@ -77,8 +77,10 @@ list_of_objects<-lapply(list_of_objects, matrix_maker)
 
 list2env(list_of_objects, .GlobalEnv)
 ```
-```{r David's Score Calculations}
-David_Score<-lapply(list_of_objects, EloRating::DS)
 
+```{r David Score Calculations, include=F}
+
+David_Score<-lapply(list_of_objects, EloRating::DS)
+David_Score<-bind_rows(David_Score, .id = "David_Score")
 ```
 
