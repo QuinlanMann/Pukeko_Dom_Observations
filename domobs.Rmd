@@ -55,9 +55,18 @@ for(i in as.list(unique(Doms$Group)))
   {assign(paste("DS_",i, sep=""), filter(Doms, Group == i))}
 
 list_of_objects <- mget(ls(.GlobalEnv, pattern = "DS_*"), envir = .GlobalEnv)
-
 list_of_objects <- lapply(list_of_objects, 
                   function(x) x[,-c(1)])
 
 list2env(list_of_objects, .GlobalEnv)
 ```
+
+```{r Matrix creation}
+MyFunc <- function(x) {
+  reshape2::dcast(data = x, formula = Dominant~Subordinate, value.var = "count")
+}
+list_of_objects <- lapply(X = list_of_objects, FUN = MyFunc)
+
+list2env(list_of_objects, .GlobalEnv)
+```
+
