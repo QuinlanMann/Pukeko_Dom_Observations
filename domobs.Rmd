@@ -9,6 +9,7 @@ output:
   pdf_document:
     toc: no
   word_document:
+    
     toc: no
   html_document:
     toc: no
@@ -44,9 +45,19 @@ library(RCurl)
 ```{r Datafrmes, echo=FALSE}
 Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 Doms<-read.csv(text=Doms)
-Locations <- unique(Doms$Group) #This worked as I wanted it to
 
-for(i in Locations) 
-  {assign(i, filter(Doms, Group == i))}
+Doms<-Doms%>%
+  group_by(Group, Dominant, Subordinate)%>%
+  summarize(count=length(Interaction))
 
+
+for(i in as.list(unique(Doms$Group))) 
+  {assign(paste("DS_",i, sep=""), filter(Doms, Group == i))}
+
+list_of_objects <- mget(ls(.GlobalEnv, pattern = "DS_*"), envir = .GlobalEnv)
+
+list_of_objects <- lapply(list_of_objects, 
+                  function(x) x[,-c(1)])
+
+list2env(list_of_objects, .GlobalEnv)
 ```
