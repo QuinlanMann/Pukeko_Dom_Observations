@@ -1,0 +1,53 @@
+---
+title: "Dominance Scoring 2024"
+subtitle: "draft" 
+author:     | 
+    | Quinlan Mann
+    | 400420834
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  pdf_document:
+    toc: no
+  word_document:
+    toc: no
+  html_document:
+    toc: no
+    keep_md: yes
+header-includes:
+  - \usepackage{lineno}
+  - \linenumbers
+  - \usepackage{setspace}
+  - \AtBeginEnvironment{tabular}{\singlespacing}
+  - \AtBeginEnvironment{lltable}{\singlespacing}
+  - \AtBeginEnvironment{tablenotes}{\doublespacing}
+linestretch: 2
+always_allow_html: true
+---
+
+```{r, setup, include=F}
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=4, warning = F, message = F)
+options(digits = 3)
+```
+
+## R Markdown
+
+```{r libraries, include=F}
+library(tidyverse)
+library(reshape2)
+library(EloRating)
+```
+
+## Creatign Dataframes
+
+```{r Datafrmes, echo=FALSE}
+Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
+Doms<-read.csv(text=Doms)
+Locations <- unique(Doms$Group) #This worked as I wanted it to
+
+for(i in Locations) 
+  {assign(i, filter(Doms, Group == i))}
+
+```
+
+
+
