@@ -37,7 +37,9 @@ library(reshape2)
 library(EloRating)
 ```
 
-## Creatign Dataframes
+## Creating Dataframes
+I want to see if this push works?
+
 
 ```{r Datafrmes, echo=FALSE}
 Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
@@ -48,6 +50,8 @@ for(i in Locations)
   {assign(i, filter(Doms, Group == i))}
 
 ```
+
+I woudl lik ethis commit to work
 
 
 
