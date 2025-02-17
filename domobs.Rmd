@@ -84,10 +84,9 @@ list2env(list_of_objects, .GlobalEnv)
 
 David_Score<-lapply(list_of_objects, EloRating::DS)
 David_Score<-bind_rows(David_Score, .id = "David_Score")
-```
 
-```{r}
 kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test") %>%
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
+
 
