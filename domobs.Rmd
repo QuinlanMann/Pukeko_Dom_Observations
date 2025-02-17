@@ -35,10 +35,10 @@ options(digits = 3)
 library(tidyverse)
 library(reshape2)
 library(EloRating)
+library(RCurl)
 ```
 
-## Creating Dataframes
-I want to see if this push works?
+## Creating Dataframes for each territory sampeled in 2011-12
 
 
 ```{r Datafrmes, echo=FALSE}
@@ -50,9 +50,3 @@ for(i in Locations)
   {assign(i, filter(Doms, Group == i))}
 
 ```
-
-I woudl lik ethis commit to work
-
-
-
-
