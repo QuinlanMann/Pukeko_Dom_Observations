@@ -43,48 +43,59 @@ library(knitr)
 
 ## Creating Dataframes for each territory sampeled in 2011-12
 
-
 ```{r Datafrmes,include=F, echo=FALSE}
+#pulling the data from Github
 Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 Doms<-read.csv(text=Doms)
 
+#summarizing counts of interactions between individual birds within groups
 Doms<-Doms%>%
   group_by(Group, Dominant, Subordinate)%>%
   summarize(count=length(Interaction))
 
-
+#Reassigning each group into unique dataframes
 for(i in as.list(unique(Doms$Group))) 
   {assign(paste("DS_",i, sep=""), filter(Doms, Group == i))}
 
+#making a list of dataframes created in the previous step
 list_of_objects <- mget(ls(.GlobalEnv, pattern = "DS_*"), envir = .GlobalEnv)
+
+#removing the group identifier column from the list of dfs
 list_of_objects <- lapply(list_of_objects, 
                   function(x) x[,-c(1)])
 
-list2env(list_of_objects, .GlobalEnv)
+#taking the modified dataframes and writing them to the Global environment
+#list2env(list_of_objects, .GlobalEnv)
 ```
+
 ```{r Matrix Creation, include=F}
-# get names for row and columns
+# Function for creating a  matrix to calculate David's Scores
 matrix_maker<-function(x){
   # construct 0 matrix of correct dimensions with row and column names
-  myMat <- matrix(0, 
-                  length(sort(unique(unlist(x[1:2])))), 
-                  length(sort(unique(unlist(x[1:2])))), 
-                  dimnames = list(sort(unique(unlist(x[1:2]))), 
+  myMat <- matrix(0, #filled with zeros
+                  length(sort(unique(unlist(x[1:2])))), #length of all unique bird name values in rows and columns
+                  length(sort(unique(unlist(x[1:2])))), #length of all unique bird name values in rows and columns
+                  dimnames = list(sort(unique(unlist(x[1:2]))), #naming rows and columns after all unique bird name values in dataframe
                                   sort(unique(unlist(x[1:2])))))
   # fill in the matrix with matrix indexing on row and column names
   myMat[as.matrix(x[c("Dominant", "Subordinate")])] <- x[["count"]]
   return(myMat)
 }
+
+#applying function to the list of objects to create square matrices
 list_of_objects<-lapply(list_of_objects, matrix_maker)
 
-list2env(list_of_objects, .GlobalEnv)
+#taking the modified dataframes and writing them to the Global environment
+#list2env(list_of_objects, .GlobalEnv)
 ```
 
 ```{r David Score Calculations, include=F}
+#applying ELoRating::DS function to the  
+list_of_objects<-lapply(list_of_objects, DS)
+#binding all David's Scores into one Dataframe
+David_Score<-bind_rows(list_of_objects, .id = "Group")
 
-David_Score<-lapply(list_of_objects, EloRating::DS)
-David_Score<-bind_rows(David_Score, .id = "David_Score")
-
+#viewing all David's scores as a table
 kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test") %>%
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
