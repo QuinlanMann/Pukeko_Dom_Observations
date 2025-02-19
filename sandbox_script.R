@@ -21,7 +21,7 @@ library(EloRating)
 
 doms<-read.csv("C:\\Users\\quinl\\Desktop\\Book1.csv")
 
-set.seed(101) ## for reproducibility
+set.seed(19970227) ## for reproducibility
 
 matrix_maker<-function(x){
   # construct 0 matrix of correct dimensions with row and column names
@@ -109,45 +109,80 @@ boot.RGBG2<-rep(0, B)
 N2<-nrow(doms4)
 
 for(i in 1:B){
-  idx=sample(1:N2, N, replace = T)
+  idx=sample(1:N2, N2, replace = T)
   doms5=doms4[idx,]
   
   doms5<-doms5%>%
     group_by(Group, Dominant, Subordinate)%>%
     summarize(count=length(Interaction))
   
-  boot.NOBA2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS
-  boot.BYYN2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS
-  boot.YRGY2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS
-  boot.XNRB2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS
-  boot.YBYG2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS
-  boot.RGBG2[i]=subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS
-  
+  boot.NOBA2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS))
+  boot.BYYN2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS))
+  boot.YRGY2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS))
+  boot.XNRB2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS))
+  boot.YBYG2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS))
+  boot.RGBG2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS) == 0, 
+                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS))
 }
 
-ggplot(as.data.frame(boot.BYYN2), aes(x=boot.BYYN2))+
-  geom_density()+
-  geom_vline(aes(xintercept = quantile(boot.BYYN2, prob = c(0.025, 0.975))))
 
-quantile(boot.BYYN2, prob = c(0.025, 0.975))
+boot.vals<-data.frame(
+  boot= c(rep(c("with"), B), rep(c('w/out'), B)), 
+  byyn=c(boot.BYYN, boot.BYYN2), 
+  noba=c(boot.NOBA, boot.NOBA2),
+  rgbg=c(boot.RGBG, boot.RGBG2), 
+  yrgy=c(boot.YRGY, boot.YRGY2), 
+  ybyg=c(boot.YBYG, boot.YBYG2), 
+  xnrb=c(boot.XNRB, boot.XNRB2)
+)
 
-gridExtra::grid.arrange(
-  (ggplot(as.data.frame(boot.BYYN2), aes(x=boot.BYYN2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="BYYN")$normDS)),
-  (ggplot(as.data.frame(boot.NOBA2), aes(x=boot.NOBA2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="NOBA")$normDS)),
-  (ggplot(as.data.frame(boot.RGBG2), aes(x=boot.RGBG2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="RGBG")$normDS)),
-  (ggplot(as.data.frame(boot.YRGY2), aes(x=boot.YRGY2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YRGY")$normDS)),
-  (ggplot(as.data.frame(boot.XNRB2), aes(x=boot.XNRB2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="XNRB")$normDS)),
-  (ggplot(as.data.frame(boot.YBYG2), aes(x=boot.YBYG2))+
-     geom_density()+
-     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YBYG")$normDS)),
-  ncol=3)
+min(na.omit(unlist(boot.vals[c(2:7)])))
+max(na.omit(unlist(boot.vals[c(2:7)])))
+
+theme_set(ggthemes::theme_few())
+ggpubr::ggarrange(
+  ggplot(boot.vals, aes(x=byyn, fill=boot))+
+    geom_density(alpha=0.5)+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="BYYN")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "BY/YN", x="David's Score"), 
+  ggplot(boot.vals, aes(x=noba, fill=boot))+
+    geom_density(alpha=.5)+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="NOBA")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "NOBA", x="David's Score"), 
+  ggplot(boot.vals, aes(x=rgbg, fill=boot))+
+    geom_density( alpha=.5)+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="RGBG")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "RG/BG", x="David's Score"), 
+  ggplot(boot.vals, aes(x=xnrb, fill=boot, alpha=.5))+
+    geom_density()+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="XNRB")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "XN/RB", x="David's Score"), 
+  ggplot(boot.vals, aes(x=ybyg, fill=boot, alpha=.5))+
+    geom_density()+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YBYG")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "YB/YG", x="David's Score"), 
+  ggplot(boot.vals, aes(x=yrgy, fill=boot, alpha=.5))+
+    geom_density()+
+    geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YRGY")$normDS, 
+               linetype="dashed", size=1)+
+    scale_x_continuous(limits = c(0.95, 3.92))+
+    labs(subtitle = "YR/GY", x="David's Score"), 
+  ncol=2, 
+  nrow=3, 
+  common.legend = T
+)
