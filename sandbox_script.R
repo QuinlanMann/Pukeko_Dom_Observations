@@ -73,7 +73,6 @@ doms3<-doms%>%
   summarize(count=length(Interaction))
 
 DS(matrix_maker(doms3[,c(2:4)]))
-subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="BYYN")$normDS
 
 theme_set(ggthemes::theme_clean())
 gridExtra::grid.arrange(
@@ -186,3 +185,26 @@ ggpubr::ggarrange(
   nrow=3, 
   common.legend = T
 )
+
+df1<-DS(matrix_maker(doms3[,c(2:4)]))
+
+df<-as.data.frame(lapply(subset(boot.vals, boot=="w/out")[,c(2:7)], 
+       FUN=mean, na.rm=T))
+
+df<-tidyr::pivot_longer(df, 
+                    cols = everything())
+df$name<-toupper(df$name)
+names(df)[names(df) == "name"] <- "ID"
+names(df)[names(df) == "value"] <- "Boot_Mean"
+
+df2<-merge(df1, df, by=c("ID"))
+
+ggplot(df2, aes(Boot_Mean, normDS, label=ID))+
+  geom_text(check_overlap = T, hjust = 0, nudge_x = 0.05)+
+  geom_point()+
+  geom_abline(intercept=0, slope=1, linetype="dashed")+
+  scale_x_continuous(limits=c(1.5, 3.75))+
+  scale_y_continuous(limits=c(1.5, 3.75))+
+  labs(x="Mean of Bootstrapped David's\nscores without copulations", 
+       y="Calculated David's scores\nfrom complete dataset")+
+  ggthemes::theme_clean()
