@@ -149,37 +149,37 @@ ggpubr::ggarrange(
     geom_density(alpha=0.5)+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="BYYN")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "BY/YN", x="David's Score"), 
   ggplot(boot.vals, aes(x=noba, fill=boot))+
     geom_density(alpha=.5)+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="NOBA")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "NOBA", x="David's Score"), 
   ggplot(boot.vals, aes(x=rgbg, fill=boot))+
     geom_density( alpha=.5)+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="RGBG")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "RG/BG", x="David's Score"), 
   ggplot(boot.vals, aes(x=xnrb, fill=boot, alpha=.5))+
     geom_density()+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="XNRB")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "XN/RB", x="David's Score"), 
   ggplot(boot.vals, aes(x=ybyg, fill=boot, alpha=.5))+
     geom_density()+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YBYG")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "YB/YG", x="David's Score"), 
   ggplot(boot.vals, aes(x=yrgy, fill=boot, alpha=.5))+
     geom_density()+
     geom_vline(xintercept = subset(DS(matrix_maker(doms3[,c(2:4)])), ID=="YRGY")$normDS, 
                linetype="dashed", size=1)+
-    scale_x_continuous(limits = c(0.95, 3.92))+
+    scale_x_continuous(limits = c(0.9, 3.92))+
     labs(subtitle = "YR/GY", x="David's Score"), 
   ncol=2, 
   nrow=3, 
@@ -208,3 +208,37 @@ ggplot(df2, aes(Boot_Mean, normDS, label=ID))+
   labs(x="Mean of Bootstrapped David's\nscores without copulations", 
        y="Calculated David's scores\nfrom complete dataset")+
   ggthemes::theme_clean()
+
+doms4<-doms4%>%
+  group_by(Group, Dominant, Subordinate)%>%
+  summarize(count=length(Interaction))
+
+df3<-DS(matrix_maker(doms4[,c(2:4)]))
+df2<-merge(df2, df3, by=c("ID"))
+
+ggplot(df2, aes(normDS.y, normDS.x, label=ID))+
+  geom_text(check_overlap = T, hjust = 0, nudge_x = 0.05)+
+  geom_point()+
+  geom_abline(intercept=0, slope=1, linetype="dashed")+
+  scale_x_continuous(limits=c(1.5, 3.75))+
+  scale_y_continuous(limits=c(1.5, 3.75))+
+  labs(x="Calculated David's scores\nwithout copulations", 
+       y="Calculated David's scores\nfrom complete dataset")+
+  ggthemes::theme_clean()
+
+DS
+
+df2$rank<-rank(-df2$normDS.x)
+df2$rank.y<-rank(-df2$normDS.y)
+
+plot(df2$normDS.x~df2$rank)
+abline(lm(df2$normDS.x~df2$rank))
+
+summary((lm(df2$normDS.x~df2$rank)))
+
+plot(df2$normDS.y~df2$rank.y)
+abline(lm(df2$normDS.y~df2$rank.y))
+
+summary((lm(df2$normDS.y~df2$rank.y)))
+
+?DS
