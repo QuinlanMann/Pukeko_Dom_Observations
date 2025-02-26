@@ -1,20 +1,3 @@
-MyFunc <- function(x) {
-  reshape2::dcast(data = x, formula = Dominant~Subordinate, value.var = "count")
-}
-list_of_objects <- lapply(X = list_of_objects, FUN = MyFunc)
-
-col2name<-function(x){
-  x<-x%>%
-    remove_rownames%>%
-    column_to_rownames(var = "Dominant")
-}
-
-list_of_objects<-lapply(list_of_objects, col2name)
-
-list_of_objects<-lapply(list_of_objects, function(x) replace(x, is.na(x), 0))
-
-list2env(list_of_objects, .GlobalEnv)
-
 #Bootstrappign
 library(tidyverse)
 library(EloRating)
@@ -116,17 +99,17 @@ for(i in 1:B){
     summarize(count=length(Interaction))
   
   boot.NOBA2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="NOBA")$normDS))
   boot.BYYN2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="BYYN")$normDS))
   boot.YRGY2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YRGY")$normDS))
   boot.XNRB2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="XNRB")$normDS))
   boot.YBYG2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="YBYG")$normDS))
   boot.RGBG2[i]=ifelse(length(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS) == 0, 
-                       NA, print(subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS))
+                       NA, (subset(DS(matrix_maker(doms5[,c(2:4)])), ID=="RGBG")$normDS))
 }
 
 
@@ -226,8 +209,6 @@ ggplot(df2, aes(normDS.y, normDS.x, label=ID))+
        y="Calculated David's scores\nfrom complete dataset")+
   ggthemes::theme_clean()
 
-DS
-
 df2$rank<-rank(-df2$normDS.x)
 df2$rank.y<-rank(-df2$normDS.y)
 
@@ -241,4 +222,30 @@ abline(lm(df2$normDS.y~df2$rank.y))
 
 summary((lm(df2$normDS.y~df2$rank.y)))
 
-?DS
+David_Score2<-David_Score
+
+David_Score<-David_Score %>%
+  group_by(Group) %>%
+  mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
+
+library(ggpmisc)
+
+ggplot(David_Score2, aes(x=good_ranks, y=normDS))+
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "R2"))) +
+  geom_point()+
+  facet_wrap(~Group)
+
+list_of_Scores = split(David_Score, David_Score$Group)
+
+regression_maker = function(data) {
+  fit = lm(normDS ~ good_ranks, data = data)
+  coef(fit)[2]
+  }
+
+regression_maker(David_Score)
+
+slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
+
+slopes<-rename(slopes, Slopes="good_ranks")
+slopes
