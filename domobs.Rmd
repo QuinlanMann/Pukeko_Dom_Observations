@@ -100,7 +100,7 @@ kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test")
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
-```{r David Score ranks within groups and plotting to get steepness}
+```{r David Score ranks within groups and plotting to get steepness 1}
 David_Score<-David_Score %>%
   group_by(Group) %>%
   mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
@@ -112,6 +112,30 @@ ggplot(David_Score, aes(x=good_ranks, y=normDS))+
   stat_poly_eq(use_label(c("eq", "R2"))) +
   geom_point()+
   facet_wrap(~Group)+
-  ggthemes::theme_clean()
+  ggthemes::theme_few()
+```
+
+
+```{r David Score ranks within groups and plotting to get steepness 2}
+ggplot(David_Score, aes(y=normDS, good_ranks, color=Group))+
+  geom_point(show.legend = FALSE, aes(shape=Group))+
+  geom_smooth(method="lm", show.legend = FALSE)+
+  ggthemes::theme_few()
+
+list_of_Scores = split(David_Score, David_Score$Group)
+
+regression_maker = function(data, var1, var2) {
+  fit = lm(normDS ~ good_ranks, data = data)
+  coef(fit)[2]
+  }
+
+regression_maker(David_Score)
+
+slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
+slopes<-rename(slopes, Slopes="good_ranks")
+```
+
+
+```{r David Score ranks within groups and plotting to get steepness}
 ```
 
