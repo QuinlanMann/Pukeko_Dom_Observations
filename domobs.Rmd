@@ -100,4 +100,18 @@ kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test")
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
+```{r David Score ranks within groups and plotting to get steepness}
+David_Score<-David_Score %>%
+  group_by(Group) %>%
+  mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
+
+library(ggpmisc)
+
+ggplot(David_Score, aes(x=good_ranks, y=normDS))+
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "R2"))) +
+  geom_point()+
+  facet_wrap(~Group)+
+  ggthemes::theme_clean()
+```
 
