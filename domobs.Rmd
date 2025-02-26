@@ -134,8 +134,3 @@ regression_maker(David_Score)
 slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
 slopes<-rename(slopes, Slopes="good_ranks")
 ```
-
-
-```{r David Score ranks within groups and plotting to get steepness}
-```
-

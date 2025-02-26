@@ -1,13 +1,15 @@
 # Data and code required to calculate the David's Scores for scored Pukeko groups
 
-## This repository includes all scripts and data to reproduce the analyses associated with the manuscript: 
+## This repository includes all scripts and data to reproduce the analyses associated with the manuscript: INCOMPLETE
 
 ## This dataset, repository, and readme are not static, text is incomplete
   The version of the dataset will reflect completeness when the version No. begins with 1
   
-## A static copy of this repository is available on .
+## A static copy of this repository is available on .\>
 
 # Reference Information
+ 
+ \>
 
 ## Provenance for this README
 
@@ -117,17 +119,13 @@
 
 ## Summary Metrics
 
--   File count: 4
--   Total file size: 100.3 KB
--   Range of individual file sizes: 9.12 KB - 36.8 KB
--   File formats: .csv, .R, .xlsx
+-   File count: 
+-   Total file size: 
+-   Range of individual file sizes: 
+-   File formats: .csv, .Rmd, .R
 
 ## Table of Contents
 
--   SBAN_Reproductive_success.R
--   NEST_SUMMARY_ANIS.csv
--   Supplemental_Tables.xlsx
--   README.md
 
 ## Setup
 
@@ -144,88 +142,30 @@
 
 # File/Folder Details
 
-## Details for: SBAN_Reproductive_success.R
--   Description: An r file containing code necessary to run all analyses
+## Details for: domobs.Rmd
+-   Description: An rmd file containing code necessary to run all analyses
+-   Format(s): .Rmd
+
+##Details for: sandbox_script.R
+-   Description: An r file containing supplemental and draft scripts necessary to run all analyses
 -   Format(s): .R
--   Size(s): 36.8 KB
--   Dimensions: 892 lines
--   Variables: n/a
 
-## Details for: NEST_SUMMARY_ANIS.csv
-
--   Description: Data used for analyses of Smooth-billed ani reproductive success
+## Details for: Dom_Obs_Master.csv
+-   Description: all dominance interactions
 -   Format(s): .csv
--   Size(s): 18.3 KB
--   Dimensions: 453R x 13C
 -   Variables:
-    -   YEAR: Calendar year that the nest and group were observed
-    -   LOCATION: Location within the park wherein the nest was observed
-    -   SITE: U.S. Fish and Wildlife Service (USFWS) National Wildlife Refuges (or adjacent property) where the group and nest was observed
-        - LC: Laguna Cartagena
-        - CR: Cabo Rojo
-        - UNK: Unknown  
-    -   ADULTS: Number of adults observed within the group
-        - see manuscript for details on how this was determined
-    -   NEST_ATTMPT: Numbered nesting attempt for that group within the year
-    -   TOT_EGGS: total number of eggs that were counted during nest checks
-        - see manuscript for details on how this was determined
-    -   EGGS_BURIED: number of eggs found within the nest cup below layers of nesting material after groups had completed the nesting attempt
-    -   EGGS_EJECTED: number of eggs found outside the nest during active laying
-    -   EGGS_UNBURIED: number of eggs found within the nest cup that were incubated
-    -   HATCHED: number of eggs that were known to have hatched
-    -   FLEDGED: number of chicks that were known to have fledged 
-    -   NEST FATE: IF KNOWN, the fate of the nest
-        -   ABD: Abandoned
-        -   ABD?: uncertain if abandoned
-        -   DEST: destroyed
-        -   DESTROYED: Destroyed
-        -   DP: Depredated
-        -   DP PSUC: Depredated but some chicks survived
-        -   FAIL: Failure
-        -   INS: Insufficient data
-        -   PSUC: partial success
-        -   SUCC: Successfully fledged
-        -   UNK: Unknown
-    -   Notes: IF PRESENT, notes about the nest/group
-
-## Details for: Supplemental_Tables.xlsx
--   Description: Supplemental results for analyses of Smooth-billed ani reproductive success
--   Format(s): .xlsx
--   Size(s): 35.1 KB
--   Dimensions: 7 sheets
-    - S1 Summary statistics of different datasets
-        - Summary statistics of all datasets
-    - S2 First nest only data, count models
-        - model outputs from count data assessing overall and per capita success across multiple reproductive stages
-        - uses the dataset that looked at only first (known) nests per group if multiple occurred
-    - S3 First nest only data, probability models
-        - model outputs from count data assessing proportion of success across multiple reproductive stages
-        - uses the dataset that looked at only first (known) nests per group if multiple occurred
-    - S4 First successful nest only data, count models
-        - model outputs from count data assessing overall and per capita success across multiple reproductive stages
-        - uses the dataset that looked at only first (known) successful nests per group if multiple occurred
-    - S5 First successful nest only data, probability models
-        - model outputs from count data assessing proportion of success across multiple reproductive stages
-        - uses the dataset that looked at only first (known) successful nests per group if multiple occurred
-    - S12 Nest count and group size
-        - Dimensions: 366R x 11C
-        - Variables:
-            - Female group size: Female group size, see man uscript for details 
-            - # of Nest attempts: Number of (known) nesting attempts
-        - Also includes output of Fisher's exact test
-    - S13 Survival of nest and group size:
-        - Dimensions: 415 x 11C
-        - Variables:
-            - Female group size: Female group size, see man uscript for details 
-            - Survival status of nest: Categorical variable of success
-                - If group fledged at least one chick it was determined to be successful (SUCC)
-                - If group did not fledge at least one chick it was determined to be a failure (FAIL)
-        - Also includes output of Fisher's exact test
+  -   Group: Name assigned to unique group found in territories
+  -   Watch: Code to identifty video recording/observation period during which interactions occurred
+  -   Dominant: the bird instigating the dominance interaction
+  -   Subordinate: the bird receiving teh dominance interaction
+  -   interaction: Type of interaction that occurred
+      - P=Posture (see John L. Craig 1977 for description of all possible dominance associated behaviors)
+      - D=Displace/Avoid
+      - C=Charge
+      - B=Bite/Kick
 
 ## Details for: README.md
--   Description: Read me containing pertinent information for the dataset and manuscript
--   Format(s): .txt
--   Size(s): 9.12 KB
--   Dimensions: 241 lines
+-   Description: INCOMPLETE READ ME DESCRIBING THE CONTENTS OF REPOSITORY
+-   Format(s): .md
 
 END OF README

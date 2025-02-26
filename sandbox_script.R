@@ -236,9 +236,13 @@ ggplot(David_Score2, aes(x=good_ranks, y=normDS))+
   geom_point()+
   facet_wrap(~Group)
 
+ggplot(David_Score, aes(y=normDS, good_ranks, color=Group))+
+  geom_point(show.legend = FALSE, aes(shape=Group))+
+  geom_smooth(method="lm", show.legend = FALSE)
+
 list_of_Scores = split(David_Score, David_Score$Group)
 
-regression_maker = function(data) {
+regression_maker = function(data, var1, var2) {
   fit = lm(normDS ~ good_ranks, data = data)
   coef(fit)[2]
   }
@@ -246,6 +250,5 @@ regression_maker = function(data) {
 regression_maker(David_Score)
 
 slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
-
 slopes<-rename(slopes, Slopes="good_ranks")
-slopes
+
