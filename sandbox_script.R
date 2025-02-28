@@ -252,3 +252,15 @@ regression_maker(David_Score)
 slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
 slopes<-rename(slopes, Slopes="good_ranks")
 
+
+DS(bonobos)
+bonobos<-bonobos
+bonobos2<-DS(bonobos)
+bonobos2$dush_norm<-dush_norm <- bonobos2$DS/length(bonobos2$ID)
+bonobos2$`bounded_normalization(0 - 1)`<-(bonobos2$DS+((length(bonobos2$ID)*(length(bonobos2$ID)-1)/2)))/(length(bonobos2$ID)*(length(bonobos2$ID)-1))
+bonobos2$`bounded_normalization(- - +)`<-bonobos2$DS/((length(bonobos2$ID)*(length(bonobos2$ID)-1)/2))
+bonobos2$ranks<-c(1:7)
+
+bonobos2
+plot(data=bonobos2, dush_norm~ranks)
+
