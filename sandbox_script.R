@@ -264,3 +264,27 @@ bonobos2$ranks<-c(1:7)
 bonobos2
 plot(data=bonobos2, dush_norm~ranks)
 
+trial<-matrix(data=c(0,0,0,0,0,0,0,
+                     1,0,0,0,0,0,0,
+                     1,1,0,0,0,0,0,
+                     1,1,1,0,0,0,0,
+                     1,1,1,1,0,0,0,
+                     1,1,1,1,1,0,0,
+                     1,1,1,1,1,1,0),
+              nrow=7, 
+              ncol =7, 
+              dimnames = list(c("a","b","c","d","e","f","g"), c("a","b","c","d","e","f","g")))
+
+ds<-DS(trial, prop="Pij")
+((length(ds$ID)*(length(ds$ID)-1))/2)/2
+ds
+ds$rank<-rank(-ds$DS)
+ds
+plot(data=ds, normDS~rank)
+summary(lm(data=ds, normDS~rank))
+
+devtools::install_github("gobbios/EloRating")
+library(EloRating)
+bonobos
+?creatematrix()
+DS(bonobos, prop = 'Pij')
