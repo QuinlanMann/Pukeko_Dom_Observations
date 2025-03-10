@@ -283,8 +283,51 @@ ds
 plot(data=ds, normDS~rank)
 summary(lm(data=ds, normDS~rank))
 
-devtools::install_github("gobbios/EloRating")
 library(EloRating)
 bonobos
-?creatematrix()
+
+DSPij<-function(x){
+  EloRating::DS(x, prop = c("Pij"))
+}
+
 DS(bonobos, prop = 'Pij')
+DSPij(bonobos)
+
+
+list_of_objects2<-lapply(list_of_objects, DSPij)
+David_Score2<-bind_rows(list_of_objects2, .id = "Group")
+David_Score2<-David_Score2 %>%
+  group_by(Group) %>%
+  mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
+library(ggpmisc)
+
+ggplot(David_Score2, aes(x=good_ranks, y=normDS))+
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "R2"))) +
+  geom_point()+
+  facet_wrap(~Group)+
+  ggthemes::theme_few()
+
+
+
+#trying things
+WCNW<-readxl::read_xlsx("C:\\Users\\quinl\\Downloads\\Observation\\Observation\\WEST CAMP NW.xlsx")
+
+WCNW$Dominant[WCNW$Dominant == 'YWBW'] <- 'YNBN'
+WCNW$Subordinate[WCNW$Subordinate == 'YWBW'] <- 'YNBN'
+WCNW$Dominant[WCNW$Dominant == 'YNBW'] <- 'YNBN'
+WCNW$Subordinate[WCNW$Subordinate == 'YNBW'] <- 'YNBN'
+WCNW$Dominant[WCNW$Dominant == 'YNBB'] <- 'YNBN'
+WCNW$Subordinate[WCNW$Subordinate == 'YNBB'] <- 'YNBN'
+WCNW$Dominant[WCNW$Dominant == 'BBYG'] <- 'YGBB'
+WCNW$Subordinate[WCNW$Subordinate == 'BBYG'] <- 'YGBB'
+WCNW$Dominant[WCNW$Dominant == 'R-RMBW'] <- 'B-RMBW'
+WCNW$Subordinate[WCNW$Subordinate == 'R-RMBW'] <- 'B-RMBW'
+
+#WCNW<-subset(WCNW, Subordinate!= "YWBW" & Dominant !="YWBW")[,-c(1)]
+
+WCNW<-WCNW[,-c(1)]%>%
+  group_by(Dominant, Subordinate)%>%
+  summarize(count=length(`Interaction (P=Posture, D=Displace/Avoid, C=Charge, B=Bite/Kick)`))
+
+DS(matrix_maker(WCNW))
