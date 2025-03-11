@@ -209,50 +209,6 @@ ggplot(df2, aes(normDS.y, normDS.x, label=ID))+
        y="Calculated David's scores\nfrom complete dataset")+
   ggthemes::theme_clean()
 
-df2$rank<-rank(-df2$normDS.x)
-df2$rank.y<-rank(-df2$normDS.y)
-
-plot(df2$normDS.x~df2$rank)
-abline(lm(df2$normDS.x~df2$rank))
-
-summary((lm(df2$normDS.x~df2$rank)))
-
-plot(df2$normDS.y~df2$rank.y)
-abline(lm(df2$normDS.y~df2$rank.y))
-
-summary((lm(df2$normDS.y~df2$rank.y)))
-
-David_Score2<-David_Score
-
-David_Score<-David_Score %>%
-  group_by(Group) %>%
-  mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
-
-library(ggpmisc)
-
-ggplot(David_Score2, aes(x=good_ranks, y=normDS))+
-  stat_poly_line() +
-  stat_poly_eq(use_label(c("eq", "R2"))) +
-  geom_point()+
-  facet_wrap(~Group)
-
-ggplot(David_Score, aes(y=normDS, good_ranks, color=Group))+
-  geom_point(show.legend = FALSE, aes(shape=Group))+
-  geom_smooth(method="lm", show.legend = FALSE)
-
-list_of_Scores = split(David_Score, David_Score$Group)
-
-regression_maker = function(data, var1, var2) {
-  fit = lm(normDS ~ good_ranks, data = data)
-  coef(fit)[2]
-  }
-
-regression_maker(David_Score)
-
-slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
-slopes<-rename(slopes, Slopes="good_ranks")
-
-
 DS(bonobos)
 bonobos<-bonobos
 bonobos2<-DS(bonobos)
@@ -264,28 +220,6 @@ bonobos2$ranks<-c(1:7)
 bonobos2
 plot(data=bonobos2, dush_norm~ranks)
 
-trial<-matrix(data=c(0,0,0,0,0,0,0,
-                     1,0,0,0,0,0,0,
-                     1,1,0,0,0,0,0,
-                     1,1,1,0,0,0,0,
-                     1,1,1,1,0,0,0,
-                     1,1,1,1,1,0,0,
-                     1,1,1,1,1,1,0),
-              nrow=7, 
-              ncol =7, 
-              dimnames = list(c("a","b","c","d","e","f","g"), c("a","b","c","d","e","f","g")))
-
-ds<-DS(trial, prop="Pij")
-((length(ds$ID)*(length(ds$ID)-1))/2)/2
-ds
-ds$rank<-rank(-ds$DS)
-ds
-plot(data=ds, normDS~rank)
-summary(lm(data=ds, normDS~rank))
-
-library(EloRating)
-bonobos
-
 DSPij<-function(x){
   EloRating::DS(x, prop = c("Pij"))
 }
@@ -293,7 +227,7 @@ DSPij<-function(x){
 DS(bonobos, prop = 'Pij')
 DSPij(bonobos)
 
-
+#If I want to make it so that they Norm Score is NOT corrected for chance
 list_of_objects2<-lapply(list_of_objects, DSPij)
 David_Score2<-bind_rows(list_of_objects2, .id = "Group")
 David_Score2<-David_Score2 %>%
@@ -308,26 +242,28 @@ ggplot(David_Score2, aes(x=good_ranks, y=normDS))+
   facet_wrap(~Group)+
   ggthemes::theme_few()
 
+#Validating weord cody dey data
+NPBNW<-readxl::read_xlsx("C:\\Users\\quinl\\Downloads\\Observation\\Observation\\NPB NW.xlsx")
+#DO NOT CHANGE
+NPBNW$Dominant[NPBNW$Dominant == 'WNBB'] <- 'YNBB'
+NPBNW$Subordinate[NPBNW$Subordinate == 'WNBB'] <- 'YNBB'
+#DO NOT CHANGE
+NPBNW$Dominant[NPBNW$Dominant == 'WYRG'] <- 'WYGR'
+NPBNW$Subordinate[NPBNW$Subordinate == 'WYRG'] <- 'WYGR'
 
+#SEE HOW TO FIX THESE ONES
+NPBNW$Dominant[NPBNW$Dominant == 'GGWW'] <- 'YYGB'
+NPBNW$Subordinate[NPBNW$Subordinate == 'GGWW'] <- 'YYGB'
 
-#trying things
-WCNW<-readxl::read_xlsx("C:\\Users\\quinl\\Downloads\\Observation\\Observation\\WEST CAMP NW.xlsx")
+NPBNW$Dominant[NPBNW$Dominant == 'WYYB'] <- 'WBYY'
+NPBNW$Subordinate[NPBNW$Subordinate == 'WYYB'] <- 'WBYY'
 
-WCNW$Dominant[WCNW$Dominant == 'YWBW'] <- 'YNBN'
-WCNW$Subordinate[WCNW$Subordinate == 'YWBW'] <- 'YNBN'
-WCNW$Dominant[WCNW$Dominant == 'YNBW'] <- 'YNBN'
-WCNW$Subordinate[WCNW$Subordinate == 'YNBW'] <- 'YNBN'
-WCNW$Dominant[WCNW$Dominant == 'YNBB'] <- 'YNBN'
-WCNW$Subordinate[WCNW$Subordinate == 'YNBB'] <- 'YNBN'
-WCNW$Dominant[WCNW$Dominant == 'BBYG'] <- 'YGBB'
-WCNW$Subordinate[WCNW$Subordinate == 'BBYG'] <- 'YGBB'
-WCNW$Dominant[WCNW$Dominant == 'R-RMBW'] <- 'B-RMBW'
-WCNW$Subordinate[WCNW$Subordinate == 'R-RMBW'] <- 'B-RMBW'
+NPBNW$Dominant[NPBNW$Dominant == 'YGYB'] <- 'YWYB'
+NPBNW$Subordinate[NPBNW$Subordinate == 'YGYB'] <- 'YWYB'
 
-#WCNW<-subset(WCNW, Subordinate!= "YWBW" & Dominant !="YWBW")[,-c(1)]
-
-WCNW<-WCNW[,-c(1)]%>%
+NPBNW<-NPBNW[,-c(1)]%>%
   group_by(Dominant, Subordinate)%>%
   summarize(count=length(`Interaction (P=Posture, D=Displace/Avoid, C=Charge, B=Bite/Kick)`))
 
-DS(matrix_maker(WCNW))
+(DS(matrix_maker(NPBNW))
+) %>% map_df(rev)
