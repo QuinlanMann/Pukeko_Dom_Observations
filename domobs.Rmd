@@ -138,7 +138,7 @@ slopes<-rename(slopes, Slopes="good_ranks")
 ```
 
 
-```{r, Code to randomize the interaction matrices and determine if slopes are "significant, include=F}
+```{r, funciton to randomize matrices and gernate a regression, include=F}
 reg_randomizer<-function(x){
   #quick check to see if the matrix is square
   x<-as.matrix(x)
@@ -209,48 +209,53 @@ reg_randomizer<-function(x){
   r2<-summary(lm(normDS ~ good_ranks, data = res))[["coefficients"]][2]
   return(r2)
 }
+```
 
-results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = 1000))
+
+```{r, Randomization and creation of dataset, include=F}
+B=1000
+
+results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = B))
 x <- unique(ls(list_of_objects2))
 colnames(results) <- x
 
 for(i in 1:length(list_of_objects2))
 {
   values <- list_of_objects2[[i]]
-  results[, i] <- as.numeric(replicate(1000, 
+  results[, i] <- as.numeric(replicate(B, 
                                   reg_randomizer(values), 
                                   simplify = FALSE))
   
 }
-```
 
-
-```{r, Visualization of density plots}
 results<-tibble::rownames_to_column(results, "iteration")
 results<-pivot_longer(results, col=c(2:16))
 results<-rename(results, id=name)
-
-
-
-ggplot(results)+
-  geom_density(aes(value), color="darkblue", fill="lightblue")+
-  facet_wrap(~ id)+
-  geom_vline(data = slopes,
-             mapping = aes(xintercept = Slopes), 
-             linetype = 'dashed', 
-             color="red")+
-  ggthemes::theme_few()
 ```
 
 
-```{r, 95% CI}
+```{r, Code to determine the significance}
+#creating confidence intervals and determining "significance"
 slopes2<-results %>%
   group_by(id) %>%
   summarise(lCI=quantile(value, 0.025), 
             uCI=quantile(value, 0.975))
-slopes2$actual<-slopes$Slopes
-slopes2$sig<-if_else(slopes2$actual>slopes2$lCI & slopes2$actual<slopes2$uCI, 
+slopes2<-merge(slopes, slopes2, by="id")
+slopes2$sig<-if_else(slopes2$Slopes>slopes2$lCI & slopes2$Slopes<slopes2$uCI, 
                      "p>0.05", "p<0.05")
-
 ```
 
+
+```{r, Visualization}
+ggplot(results)+
+  geom_density(aes(value), color="darkblue", fill="lightblue")+
+  facet_wrap(~ id)+
+  geom_vline(data = slopes2,
+             mapping = aes(xintercept = Slopes), 
+             linetype = 'dashed', 
+             color="red")+
+  ggthemes::theme_few()+
+  theme(legend.position = "none",  # Hide the legend as it's redundant with facets
+        strip.text = element_text(size = 12, face = "bold")) +  # Bold the facet labels
+  geom_text(data = slopes2, aes(y = 20, x = -.90, label = sig), position = position_nudge(0.2), size = 4)
+```
