@@ -267,3 +267,20 @@ NPBNW<-NPBNW[,-c(1)]%>%
 
 (DS(matrix_maker(NPBNW))
 ) %>% map_df(rev)
+
+ALLBANDS<-readxl::read_xlsx("C:\\Users\\quinl\\Downloads\\All Tawharanui Banded Pukeko_2022 (3).xlsx")
+
+xxx<-merge(David_Score, ALLBANDS, by.x = "ID", by.y = "Colour.bands")[,c(1:7)]
+xxx<-unique(xxx)
+
+PPO<-readxl::read_xlsx("C:\\Users\\quinl\\Downloads\\PPO_MASTERLIST_2024 (2).xlsx")
+PPO<-PPO[,c(1,7,9)]
+
+xxx2<-merge(xxx, PPO, by.x = "number", by.y="Below Knee Left")
+
+write.csv(xxx2, "C:\\Users\\quinl\\Downloads\\xxx2.csv")
+
+xxx2$Band.Number<-gsub("M-", "", as.character(xxx2$Band.Number))
+
+xxx2$TF<-if_else(xxx2$Band.Number==xxx2$number, "T", "F")
+write.csv(David_Score, "C:\\Users\\quinl\\Downloads\\xxx3.csv")
