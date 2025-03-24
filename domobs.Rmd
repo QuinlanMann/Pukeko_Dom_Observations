@@ -138,7 +138,7 @@ slopes<-rename(slopes, Slopes="good_ranks")
 ```
 
 
-```{r, funciton to randomize matrices and gernate a regression, include=F}
+```{r, function to randomize matrices and gernate a regression, include=F}
 reg_randomizer<-function(x){
   #quick check to see if the matrix is square
   x<-as.matrix(x)
@@ -229,7 +229,7 @@ for(i in 1:length(list_of_objects2))
 }
 
 results<-tibble::rownames_to_column(results, "iteration")
-results<-pivot_longer(results, col=c(2:16))
+results<-pivot_longer(results, col=c(2:(length(list_of_objects2)+1)))
 results<-rename(results, id=name)
 ```
 
