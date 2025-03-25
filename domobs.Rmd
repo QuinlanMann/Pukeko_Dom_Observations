@@ -29,9 +29,8 @@ always_allow_html: true
 ```{r, setup, include=F}
 knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=4, warning = F, message = F)
 options(digits = 3)
+set.seed(19970227)
 ```
-
-## R Markdown
 
 ```{r libraries, include=F}
 library(tidyverse)
@@ -42,7 +41,7 @@ library(kableExtra)
 library(knitr)
 ```
 
-## Creating Dataframes for each territory sampeled in 2011-12
+## Creating Dataframes for each territory 
 
 ```{r Datafrmes,include=F, echo=FALSE}
 #pulling the data from Github
@@ -91,7 +90,7 @@ list_of_objects2<-list_of_objects
 list2env(list_of_objects, .GlobalEnv)
 ```
 
-```{r David Score Calculations, include=F}
+```{r David Score Calculations}
 #applying ELoRating::DS function to the  
 list_of_objects<-lapply(list_of_objects, DS)
 #binding all David's Scores into one Dataframe
@@ -102,7 +101,7 @@ kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test")
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
-```{r David Score ranks within groups and plotting to get steepness 1}
+```{r David Score ranks within groups and plotting to get steepness 1, include=F}
 David_Score<-David_Score %>%
   group_by(Group) %>%
   mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
@@ -116,7 +115,6 @@ ggplot(David_Score, aes(x=good_ranks, y=normDS))+
   facet_wrap(~Group)+
   ggthemes::theme_few()
 ```
-
 
 ```{r David Score ranks within groups and plotting to get steepness 2}
 ggplot(David_Score, aes(y=normDS, good_ranks, color=Group))+
@@ -137,8 +135,7 @@ slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
 slopes<-rename(slopes, Slopes="good_ranks")
 ```
 
-
-```{r, function to randomize matrices and gernate a regression, include=F}
+```{r function to randomize matrices and generate a regression, include=F}
 reg_randomizer<-function(x){
   #quick check to see if the matrix is square
   x<-as.matrix(x)
@@ -211,9 +208,8 @@ reg_randomizer<-function(x){
 }
 ```
 
-
-```{r, Randomization and creation of dataset, include=F}
-B=1000
+```{r Randomization and creation of dataset, include=F}
+B=20000
 
 results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = B))
 x <- unique(ls(list_of_objects2))
@@ -228,34 +224,29 @@ for(i in 1:length(list_of_objects2))
   
 }
 
+N=length(colnames(results))
+
+slopes$p <- sapply(1:N, function(i) {
+  mean(results[[i]] < slopes$Slopes[i])
+})
+
 results<-tibble::rownames_to_column(results, "iteration")
 results<-pivot_longer(results, col=c(2:(length(list_of_objects2)+1)))
 results<-rename(results, id=name)
 ```
 
-
-```{r, Code to determine the significance}
-#creating confidence intervals and determining "significance"
-slopes2<-results %>%
-  group_by(id) %>%
-  summarise(lCI=quantile(value, 0.025), 
-            uCI=quantile(value, 0.975))
-slopes2<-merge(slopes, slopes2, by="id")
-slopes2$sig<-if_else(slopes2$Slopes>slopes2$lCI & slopes2$Slopes<slopes2$uCI, 
-                     "p>0.05", "p<0.05")
-```
-
-
-```{r, Visualization}
+```{r Visualization}
 ggplot(results)+
   geom_density(aes(value), color="darkblue", fill="lightblue")+
   facet_wrap(~ id)+
-  geom_vline(data = slopes2,
+  geom_vline(data = slopes,
              mapping = aes(xintercept = Slopes), 
              linetype = 'dashed', 
              color="red")+
   ggthemes::theme_few()+
-  theme(legend.position = "none",  # Hide the legend as it's redundant with facets
-        strip.text = element_text(size = 12, face = "bold")) +  # Bold the facet labels
-  geom_text(data = slopes2, aes(y = 20, x = -.90, label = sig), position = position_nudge(0.2), size = 4)
+  theme(legend.position = "none") +  # Bold the facet labels
+  geom_text(data = slopes, aes(y = 20, x = -.6, 
+                               label = ifelse(p == 0, 
+                               "p<0.001", 
+                               paste("p=", round(p, 3), sep=""))))
 ```
