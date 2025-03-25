@@ -101,7 +101,7 @@ kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test")
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
-```{r David Score ranks within groups and plotting to get steepness 1, include=F}
+```{r David Score ranks within groups and plotting to get steepness 1}
 David_Score<-David_Score %>%
   group_by(Group) %>%
   mutate(good_ranks = order(order(normDS, decreasing=TRUE)))
@@ -116,7 +116,7 @@ ggplot(David_Score, aes(x=good_ranks, y=normDS))+
   ggthemes::theme_few()
 ```
 
-```{r David Score ranks within groups and plotting to get steepness 2}
+```{r David Score ranks within groups and plotting to get steepness 2, include=F}
 ggplot(David_Score, aes(y=normDS, good_ranks, color=Group))+
   geom_point(show.legend = FALSE, aes(shape=Group))+
   geom_smooth(method="lm", show.legend = FALSE)+
@@ -128,8 +128,6 @@ regression_maker = function(data, var1, var2) {
   fit = lm(normDS ~ good_ranks, data = data)
   coef(fit)[2]
   }
-
-regression_maker(David_Score)
 
 slopes<-map_dfr(list_of_Scores, regression_maker, .id = "id")
 slopes<-rename(slopes, Slopes="good_ranks")
@@ -209,7 +207,7 @@ reg_randomizer<-function(x){
 ```
 
 ```{r Randomization and creation of dataset, include=F}
-B=20000
+B=20
 
 results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = B))
 x <- unique(ls(list_of_objects2))
@@ -246,7 +244,7 @@ ggplot(results)+
   ggthemes::theme_few()+
   theme(legend.position = "none") +  # Bold the facet labels
   geom_text(data = slopes, aes(y = 20, x = -.6, 
-                               label = ifelse(p == 0, 
-                               "p<0.001", 
-                               paste("p=", round(p, 3), sep=""))))
+                               label = ifelse(round(p, 3) == 0, 
+                                              "p<0.001", 
+                                              paste("p=", round(p, 3), sep=""))))
 ```
