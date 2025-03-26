@@ -22,10 +22,10 @@
 ## Dataset Version and Release History
 
 -   Current Version:
-    -   Number: 0.0.5
-    -   Date: 2025-02-26
+    -   Number: 0.0.6
+    -   Date: 2025-03-26
     -   Persistent identifier: 
-    -   Summary of changes: UPLOADED DATA ON N COAST SE GROUP
+    -   Summary of changes: UPLOADED DATA ON lookout SE GROUP
 -   Embargo Provenance: n/a
     -   Scope of embargo: n/a
     -   Embargo period: n/a
