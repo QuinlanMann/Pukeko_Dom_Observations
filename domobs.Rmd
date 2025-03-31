@@ -47,6 +47,8 @@ library(knitr)
 #pulling the data from Github
 Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 Doms<-read.csv(text=Doms)
+#if I'm offline use this line
+#Doms<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\Pukeko_Dom_Observations\\Dom_Obs_Master.csv")
 
 #summarizing counts of interactions between individual birds within groups
 Doms<-Doms%>%
@@ -54,8 +56,8 @@ Doms<-Doms%>%
   summarize(count=length(Interaction))
 
 #Reassigning each group into unique dataframes
-for(i in as.list(unique(Doms$Group))) 
-  {assign(paste("DS_",i, sep=""), filter(Doms, Group == i))}
+for(H in as.list(unique(Doms$Group))) 
+  {assign(paste("DS_",H, sep=""), filter(Doms, Group == H))}
 
 #making a list of dataframes created in the previous step
 list_of_objects <- mget(ls(.GlobalEnv, pattern = "DS_*"), envir = .GlobalEnv)
@@ -79,6 +81,8 @@ matrix_maker<-function(x){
                                   sort(unique(unlist(x[1:2])))))
   # fill in the matrix with matrix indexing on row and column names
   myMat[as.matrix(x[c("Dominant", "Subordinate")])] <- x[["count"]]
+  #birds not included in any Dom related interactions are included as interacting with themselves in the dataset, and as such are included as 1 instance of interaction with themselves (impossible), this sets that value to a true zero
+  diag(myMat)<-0
   return(myMat)
 }
 
@@ -207,25 +211,25 @@ reg_randomizer<-function(x){
 ```
 
 ```{r Randomization and creation of dataset, include=F}
-B=20
+C=200
 
-results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = B))
-x <- unique(ls(list_of_objects2))
-colnames(results) <- x
+results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = C))
+W <- unique(ls(list_of_objects2))
+colnames(results) <- W
 
-for(i in 1:length(list_of_objects2))
+for(H in 1:length(list_of_objects2))
 {
-  values <- list_of_objects2[[i]]
-  results[, i] <- as.numeric(replicate(B, 
+  values <- list_of_objects2[[H]]
+  results[, H] <- as.numeric(replicate(C, 
                                   reg_randomizer(values), 
                                   simplify = FALSE))
   
 }
 
-N=length(colnames(results))
+S=length(colnames(results))
 
-slopes$p <- sapply(1:N, function(i) {
-  mean(results[[i]] < slopes$Slopes[i])
+slopes$p <- sapply(1:S, function(H) {
+  mean(results[[H]] < slopes$Slopes[H])
 })
 
 results<-tibble::rownames_to_column(results, "iteration")
@@ -243,7 +247,7 @@ ggplot(results)+
              color="red")+
   ggthemes::theme_few()+
   theme(legend.position = "none") +  # Bold the facet labels
-  geom_text(data = slopes, aes(y = 20, x = -.6, 
+  geom_text(data = slopes, aes(y = 20, x = -.55, 
                                label = ifelse(round(p, 3) == 0, 
                                               "p<0.001", 
                                               paste("p=", round(p, 3), sep=""))))
