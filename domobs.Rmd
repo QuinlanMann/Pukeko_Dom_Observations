@@ -22,7 +22,7 @@ header-includes:
   - \AtBeginEnvironment{tabular}{\singlespacing}
   - \AtBeginEnvironment{lltable}{\singlespacing}
   - \AtBeginEnvironment{tablenotes}{\doublespacing}
-linestretch: 2
+linestretch: .5
 always_allow_html: true
 ---
 
@@ -114,7 +114,7 @@ library(ggpmisc)
 
 ggplot(David_Score, aes(x=good_ranks, y=normDS))+
   stat_poly_line() +
-  stat_poly_eq(use_label(c("eq", "R2"))) +
+  stat_poly_eq(use_label(c("eq", "R2")), size=2) +
   geom_point()+
   facet_wrap(~Group)+
   ggthemes::theme_few()
@@ -175,6 +175,7 @@ reg_randomizer<-function(x){
            count=LOSS)
   #binding the new dataframes
   x<-rbind(wins,loss)
+  
   #making them back to a matrix
   myMat <- matrix(0, #filled with zeros
                   length(sort(unique(unlist(x[1:2])))), #length of all unique bird name values in rows and columns
@@ -183,6 +184,7 @@ reg_randomizer<-function(x){
                                   sort(unique(unlist(x[1:2])))))
   # fill in the matrix with matrix indexing on row and column names
   myMat[as.matrix(x[c("Dominant", "Subordinate")])] <- x[["count"]]
+  
   #DS calculation from EloRating Package
   rn <- rownames(myMat)
   cn <- colnames(myMat)
@@ -192,7 +194,7 @@ reg_randomizer<-function(x){
   summatrix <- replace(summatrix, summatrix == 0, NA)
   l1 <- which(is.na(summatrix), arr.ind = TRUE)
   #this is using the Dij calculation change if you decide to use the Pij calculation
-  propmatrix <- (myMat + 0.5)/(tmat + myMat + 1)
+    propmatrix <- (myMat + 0.5)/(tmat + myMat + 1)
   propmatrix <- replace(propmatrix, l1, 0)
   w <- rowSums(propmatrix)
   w2 <- propmatrix %*% w
@@ -205,13 +207,15 @@ reg_randomizer<-function(x){
   res <- res[order(res$DS, decreasing = TRUE), ]
   rownames(res) <- NULL
   #return(res)
+  
+  #creates linear model and outputs the regression slope
   r2<-summary(lm(normDS ~ good_ranks, data = res))[["coefficients"]][2]
   return(r2)
 }
 ```
 
 ```{r Randomization and creation of dataset, include=F}
-C=200
+C=2000
 
 results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = C))
 W <- unique(ls(list_of_objects2))
@@ -237,7 +241,7 @@ results<-pivot_longer(results, col=c(2:(length(list_of_objects2)+1)))
 results<-rename(results, id=name)
 ```
 
-```{r Visualization}
+```{r Visualization of slopes}
 ggplot(results)+
   geom_density(aes(value), color="darkblue", fill="lightblue")+
   facet_wrap(~ id)+
@@ -252,3 +256,78 @@ ggplot(results)+
                                               "p<0.001", 
                                               paste("p=", round(p, 3), sep=""))))
 ```
+
+```{r linearity calculations and permutations, include=F}
+devries2<-function (m, Nperms = 10000, history = T, plot = F) 
+  { diag(m) <- 0
+    m <- as.matrix(m)
+    total <- m + t(m)
+    g <- igraph::graph.adjacency(m, mode = "directed", weighted = TRUE, 
+                                 diag = FALSE)
+    N <- nrow(m)
+    NN <- N * N
+    d <- igraph::degree(g, mode = "out")
+    hF1 <- (12/((N^3) - N))
+    hF2 <- (N - 1)/2
+    h <- hF1 * sum((d - hF2)^2)
+    h0 <- vector(length = Nperms)
+    hr <- vector(length = Nperms)
+    fixedels <- ((total > 0) + 0)
+    randomels <- 1 - fixedels
+    diag(randomels) <- 0
+    fixedvals <- fixedels * (0.5 * (((m > t(m)) + 0) - ((t(m) > 
+                                                           m) + 0) + 1))
+    for (k in 1:Nperms) {
+      randmat <- matrix(stats::runif(NN), ncol = N)
+      newmat <- fixedvals + randomels * ((randmat > t(randmat)) + 
+                                           0)
+      V <- rowSums(newmat)
+      h0[k] <- hF1 * sum((V - hF2)^2)
+      randmat <- matrix(stats::runif(NN), ncol = N)
+      nm <- (randmat > t(randmat)) + 0
+      Vr <- rowSums(nm)
+      hr[k] <- hF1 * sum((Vr - hF2)^2)
+    }
+    t <- sum((hr >= h0) + 0)
+    hmod <- mean(h0)
+    p <- t/Nperms
+    if (history == F & plot == F) {
+      return(list(`h-modified` = hmod, `p-value` = p))
+    }
+    if (history == T & plot == F) {
+      return(list(`h-modified` = hmod, `p-value` = p, `h-rand` = hr))
+    }
+    if (history == F & plot == T) {
+      cat("h-modified =", hmod, "\n", "p-value=", p)
+      graphics::hist(hr, xlim = c(0, 1), xlab = "Landau h values from simulation", 
+                     main = "Observed h' vs. Randomized Distribution")
+      graphics::abline(v = hmod, lty = 3, lwd = 1.5, col = "red")
+    }
+    if (history == T & plot == T) {
+      warning("Plot only shown when history=F")
+      cat("h-modified =", hmod, "\n", "p-value=", p)
+      graphics::hist(hr, xlim = c(0, 1), xlab = "Landau h values from simulation", 
+                     main = "Observed h' vs. Randomized Distribution")
+      graphics::abline(v = hmod, lty = 3, lwd = 1.5, col = "red")
+    }
+  }
+```
+
+
+```{r, linearity application and visualization, echo=F}
+linearity<-lapply(list_of_objects2, devries2)
+linearity<-bind_rows(linearity, .id = "Group")
+
+ggplot(linearity)+
+  geom_histogram(aes(`h-rand`), color="orange", fill="yellow")+
+  facet_wrap(~ Group)+
+  geom_vline(data=linearity,
+             mapping = aes(xintercept = `h-modified`), 
+             linetype = 'dashed', 
+             color="black")+
+  ggthemes::theme_few()+
+  theme(legend.position = "none")+
+  geom_text(aes(y = 2000, x = 0.25,
+                label=paste("p=", round(`p-value`, 3), sep="")))
+```
+
