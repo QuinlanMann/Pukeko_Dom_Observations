@@ -9,6 +9,7 @@ output:
   pdf_document:
     latex_engine: xelatex
     toc: no
+    keep_md: TRUE
   word_document:
     toc: no
   html_document:
@@ -54,6 +55,8 @@ Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observati
 Doms<-read.csv(text=Doms)
 #if I'm offline use this line
 #Doms<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\Pukeko_Dom_Observations\\Dom_Obs_Master.csv")
+
+Doms<-subset(Doms, Interaction!= "X")
 
 #summarizing counts of interactions between individual birds within groups
 Doms<-Doms%>%
@@ -106,7 +109,7 @@ list_of_objects<-lapply(list_of_objects, DS)
 David_Score<-bind_rows(list_of_objects, .id = "Group")
 
 #viewing all David's scores as a table
-kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "Test") %>%
+kable(David_Score, "latex", booktabs = TRUE, longtable = TRUE, caption = "DAvid Scores within group, calculated usign the EloRating Package (*CITE*), and the Normalized Daivid's scores corrected for chance, as described in De Vries et al. (2006)") %>%
   kable_styling(latex_options = c("hold_position", "repeat_header"))
 ```
 
