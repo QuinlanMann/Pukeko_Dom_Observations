@@ -274,3 +274,47 @@ NPBNW<-NPBNW[,-c(1)]%>%
 
 (DS(matrix_maker(NPBNW))
 ) %>% map_df(rev)
+
+try2<-t(matrix(c(0,1,1,4,2,6,10,
+                 0,0,4,5,0,10,4,
+                 0,2,0,4,65,8,3,
+                 2,3,2,0,0,80,10,
+                 1,0,0,0,0,6,7,
+                 1,8,5,0,2,0,6,
+                 4,0,1,8,5,3,0), 
+               nrow = 7))
+
+rownames(try2)<-c("a", "b", "c", "d", "e", "f", "g")
+colnames(try2)<-c("a", "b", "c", "d", "e", "f", "g")
+
+#BOOTSTRAPPING DS
+# Create a list to store all results
+BOOT_davids <- list()
+
+# Loop through each matrix in the list
+for (H in seq_along(list_of_objects2)) {
+  mat <- list_of_objects2[[H]]
+  
+  # Run reg_randomizer `C` times on this matrix
+  reps <- replicate(C, reg_randomizer(mat), simplify = FALSE)
+  
+  # For each replicate, extract Scores and annotate with IDs
+  rep_scores <- lapply(seq_along(reps), function(S) {
+    df <- reps[[S]]$Scores
+    df$MatrixID <- H
+    df$Replicate <- S
+    return(df)
+  })
+  
+  # Combine replicates for this matrix
+  BOOT_davids[[H]] <- do.call(rbind, rep_scores)
+}
+
+# Combine all matrices into one big data frame
+BOOT_davids <- do.call(rbind, BOOT_davids)
+
+group_by(BOOT_davids, MatrixID, ID) %>%
+  summarise(mean_normDS = mean(normDS), 
+            UCI = quantile(normDS, probs=0.975), 
+            LCI = quantile(normDS, probs=0.025),
+           
