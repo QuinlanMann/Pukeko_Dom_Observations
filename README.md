@@ -17,15 +17,15 @@
 -   Author: Quinlan M Mann
 -   Other contributors: 
 -   Date created: 2025-02-17
--   Date modified: 2025-02-26
+-   Date modified: 2025-04-10
 
 ## Dataset Version and Release History
 
 -   Current Version:
-    -   Number: 0.0.6
-    -   Date: 2025-03-26
+    -   Number: 0.0.8
+    -   Date: 2025-04-10
     -   Persistent identifier: 
-    -   Summary of changes: UPLOADED DATA ON lookout SE GROUP
+    -   Summary of changes: UPLOADED DATA ON EHAY
 -   Embargo Provenance: n/a
     -   Scope of embargo: n/a
     -   Embargo period: n/a
