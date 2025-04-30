@@ -313,8 +313,32 @@ for (H in seq_along(list_of_objects2)) {
 # Combine all matrices into one big data frame
 BOOT_davids <- do.call(rbind, BOOT_davids)
 
-group_by(BOOT_davids, MatrixID, ID) %>%
-  summarise(mean_normDS = mean(normDS), 
-            UCI = quantile(normDS, probs=0.975), 
-            LCI = quantile(normDS, probs=0.025),
-           
+Doms %>%
+  filter()
+
+Doms<-Doms[-Doms$Interaction %in% c("X"), ]
+
+length(Doms$Interaction=="X")
+
+ggplot(David_Score, aes(x=good_ranks, y=normDS))+
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq")), size=4) +
+  geom_point()+
+  facet_wrap(~Group, ncol=4)+
+  labs(x="Within Group Rank", y="Normalized David's Score")+
+  ggthemes::theme_few()
+
+print(unique(David_Score$Group))
+# New facet label names for
+ggplot(results)+
+  geom_density(aes(value), color="darkblue", fill="lightblue")+
+  facet_wrap(~ id, ncol=4)+
+  geom_vline(data = slopes,
+             mapping = aes(xintercept = Slopes), 
+             linetype = 'dashed', 
+             color="red")+
+  ggthemes::theme_few()+
+  geom_text(data = slopes, aes(y = 20, x = -.55, 
+                               label = ifelse(round(p, 3) == 0, 
+                                              "p<0.001", 
+                                              paste("p=", round(p, 3), sep=""))))
