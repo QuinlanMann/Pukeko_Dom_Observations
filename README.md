@@ -17,15 +17,15 @@
 -   Author: Quinlan M Mann
 -   Other contributors: 
 -   Date created: 2025-02-17
--   Date modified: 2025-04-10
+-   Date modified: 2025-05-26
 
 ## Dataset Version and Release History
 
 -   Current Version:
-    -   Number: 0.0.8
-    -   Date: 2025-04-10
+    -   Number: 0.0.9
+    -   Date: 2025-05-26
     -   Persistent identifier: 
-    -   Summary of changes: UPLOADED DATA ON EHAY
+    -   Summary of changes: COMPLETED OBSERVATIONS OF STAFF 3
 -   Embargo Provenance: n/a
     -   Scope of embargo: n/a
     -   Embargo period: n/a
