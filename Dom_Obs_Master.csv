@@ -1703,9 +1703,10 @@ staff_3,01-Mar,RBNR,WRBY,B
 staff_3,0-0, YYNY, YYNY,NA
 staff_3,0-0, NGYN, NGYN,NA
 staff_3,13-Feb,RBNR,WRGY,D
-Rd_Flats_Swede_gate,0-0,NOBA,NOBA,NA
-Rd_Flats_Swede_gate,0-0,RGGN,RGGN,NA
-Rd_Flats_Swede_gate,0-0,BWBN,BWBN,NA
 Rd_Flats_Swede_gate,0-0,RNBB,RNBB,NA
-Rd_Flats_Swede_gate,0-0,WGGG,WGGG,NA
 Rd_Flats_Swede_gate,0-0,GBYW,GBYW,NA
+Rd_Flats_Swede_gate,17-1,WGGG,RGGN,B
+Rd_Flats_Swede_gate,17-1,WGGG,BWBN,B
+Rd_Flats_Swede_gate,17-1,WGGG,BWBN,B
+Rd_Flats_Swede_gate,17-1,WGGG,BWBN,B
+Rd_Flats_Swede_gate,17-1,WGGG,NOBA,B
