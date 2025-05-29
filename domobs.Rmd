@@ -129,7 +129,8 @@ David_Score$Group <- factor(David_Score$Group, levels = c("DS_E_Hay","DS_EAST_CA
                                       "DS_Hay_3W","DS_HAY1_N",
                                       "DS_LookoutSE","DS_NCoastSE",
                                       "DS_NPB NW","DS_NPB_E",
-                                      "DS_NPB_S","DS_RdFlatAnchorGate",
+                                      "DS_NPB_S","DS_Rd_Flats_Swede_gate",
+                                      "DS_RdFlatAnchorGate",
                                       "DS_ROAD_FLATS_SE","DS_SPB_N_CURVE",
                                       "DS_SPBTrigGate","DS_staff_3",
                                       "DS_SY1_C","DS_SY1_NE",
@@ -139,7 +140,8 @@ David_Score$Group <- factor(David_Score$Group, levels = c("DS_E_Hay","DS_EAST_CA
                              "Hay 3W", "Hay 1N", 
                              "Lookout SE", "North Coast SE", 
                              "N. Punchbowl NW", "N. Punchbowl E", 
-                             "N. Punchbowl S", "Road Flats: Parking", 
+                             "N. Punchbowl S", "Road Flats: Swede gate",
+                             "Road Flats: Parking", 
                              "Road Flats SE", "S. Punchbowl N", 
                              "S. Punchbowl: Trig gate", "Staff 3", 
                              "Stockyard 1 C", "Stockyard 1 NE", 
@@ -251,7 +253,7 @@ reg_randomizer<-function(x){
 ```
 
 ```{r Randomization and creation of dataset, include=F}
-C=20
+C=200
 
 results <- data.frame(matrix(ncol = length(list_of_objects2), nrow = C))
 W <- unique(ls(list_of_objects2))
@@ -280,7 +282,8 @@ results$id<-factor(results$id, levels = c("DS_E_Hay","DS_EAST_CAMP_SE",
                                       "DS_Hay_3W","DS_HAY1_N",
                                       "DS_LookoutSE","DS_NCoastSE",
                                       "DS_NPB NW","DS_NPB_E",
-                                      "DS_NPB_S","DS_RdFlatAnchorGate",
+                                      "DS_NPB_S","DS_Rd_Flats_Swede_gate",
+                                      "DS_RdFlatAnchorGate",
                                       "DS_ROAD_FLATS_SE","DS_SPB_N_CURVE",
                                       "DS_SPBTrigGate","DS_staff_3",
                                       "DS_SY1_C","DS_SY1_NE",
@@ -290,7 +293,8 @@ results$id<-factor(results$id, levels = c("DS_E_Hay","DS_EAST_CAMP_SE",
                              "Hay 3W", "Hay 1N", 
                              "Lookout SE", "North Coast SE", 
                              "N. Punchbowl NW", "N. Punchbowl E", 
-                             "N. Punchbowl S", "Road Flats: Parking", 
+                             "N. Punchbowl S", "Road Flats: Swede gate",
+                             "Road Flats: Parking", 
                              "Road Flats SE", "S. Punchbowl N", 
                              "S. Punchbowl: Trig gate", "Staff 3", 
                              "Stockyard 1 C", "Stockyard 1 NE", 
@@ -356,7 +360,8 @@ linearity$Group<-factor(linearity$Group, levels = c("DS_E_Hay","DS_EAST_CAMP_SE"
                                       "DS_Hay_3W","DS_HAY1_N",
                                       "DS_LookoutSE","DS_NCoastSE",
                                       "DS_NPB NW","DS_NPB_E",
-                                      "DS_NPB_S","DS_RdFlatAnchorGate",
+                                      "DS_NPB_S","DS_Rd_Flats_Swede_gate",
+                                      "DS_RdFlatAnchorGate",
                                       "DS_ROAD_FLATS_SE","DS_SPB_N_CURVE",
                                       "DS_SPBTrigGate","DS_staff_3",
                                       "DS_SY1_C","DS_SY1_NE",
@@ -366,7 +371,8 @@ linearity$Group<-factor(linearity$Group, levels = c("DS_E_Hay","DS_EAST_CAMP_SE"
                              "Hay 3W", "Hay 1N", 
                              "Lookout SE", "North Coast SE", 
                              "N. Punchbowl NW", "N. Punchbowl E", 
-                             "N. Punchbowl S", "Road Flats: Parking", 
+                             "N. Punchbowl S", "Road Flats: Swede gate",
+                             "Road Flats: Parking", 
                              "Road Flats SE", "S. Punchbowl N", 
                              "S. Punchbowl: Trig gate", "Staff 3", 
                              "Stockyard 1 C", "Stockyard 1 NE", 
