@@ -405,9 +405,10 @@ F_SCORE<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\
 DF<-merge(David_Score, IDS, by.x = "ID", by.y = "COMBO", all=T, sort=F)
 DF<-merge(DF, F_SCORE, by = "PPO")
 
-ggplot(DF, aes(f_mean, normDS), fill=Group)+
+ggplot(DF, aes(f_mean, DS), fill=Group)+
   geom_point()+
-  geom_smooth(method="lm")+
+  geom_smooth(method="lm", se=F)+
+  scale_x_continuous(limits=c(0.05, 0.7))+
   ggthemes::theme_few()
 
 ```
