@@ -394,3 +394,69 @@ ggplot(linearity)+
                 label=paste("p=", round(`p-value`, 3), sep="")))
 ```
 
+```{r}
+#pulling the data from Github
+#Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
+#Doms<-read.csv(text=Doms)
+
+IDS<-na.omit(read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\ID.csv")[-c(3:6)])
+F_SCORE<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\f_score_prelim.csv")
+
+DF<-merge(David_Score, IDS, by.x = "ID", by.y = "COMBO", all=T, sort=F)
+DF<-merge(DF, F_SCORE, by = "PPO")
+
+ggplot(DF, aes(f_mean, normDS), fill=Group)+
+  geom_point()+
+  geom_smooth(method="lm")+
+  ggthemes::theme_few()
+
+```
+
+```{r}
+Relate<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\relatedness.csv")
+
+Relate<-Relate[,c(1,2,12)]
+Relate<-merge(Relate, IDS[c(1,3)], by.x = "ID1", by.y="PPO", all = T)
+names(Relate)[names(Relate) == 'GRP'] <- 'GRP1'
+Relate<-merge(Relate, IDS[c(1,3)], by.x = "ID2", by.y="PPO", all = T)
+names(Relate)[names(Relate) == 'GRP'] <- 'GRP2'
+
+Relate<-subset(Relate, GRP1==GRP2 & ID1!=ID2)
+
+ggplot(Relate, aes(GRP1, R_1.2))+
+  geom_point()+
+  geom_boxplot()
+unique(Relate$GRP2)
+
+Relate$GRP2 <- factor(Relate$GRP2, levels = c("ECAMPSE",
+                                                          "HAY3W",
+                                                          "LOOKOUTSE","NCOASTSE",
+                                                          "NPBNW","NPBE",
+                                                          "NPBS","RDFLATSSWEDE",
+                                                          "RDFLATSANCHOR",
+                                                          "RDFLATSSE","SPBCURVE",
+                                                          "SPBTRIG","STAFF3",
+                                                          "SY1C","SY1NE",
+                                                          "SY1NW","WCAMPC",
+                                                          "WCAMPNW"),
+                            labels = c("East Camp SE", 
+                                       "Hay 3W", 
+                                       "Lookout SE", "North Coast SE", 
+                                       "N. Punchbowl NW", "N. Punchbowl E", 
+                                       "N. Punchbowl S", "Road Flats: Swede gate",
+                                       "Road Flats: Parking", 
+                                       "Road Flats SE", "S. Punchbowl N", 
+                                       "S. Punchbowl: Trig gate", "Staff 3", 
+                                       "Stockyard 1 C", "Stockyard 1 NE", 
+                                       "Stockyard 1 NW", "West Camp C", 
+                                       "West Camp NW"))
+
+Relate<-merge(Relate, slopes, by.x = "GRP2", by.y = "id", all=T)
+
+ggplot(Relate, aes(Slopes, R_1.2))+
+  geom_jitter(width=0.01)+
+  geom_smooth(method="lm")+
+  scale_y_continuous(limits = c(0.05, 1))+
+  ggthemes::theme_few()
+```
+
