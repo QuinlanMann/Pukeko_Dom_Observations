@@ -342,3 +342,204 @@ ggplot(results)+
                                label = ifelse(round(p, 3) == 0, 
                                               "p<0.001", 
                                               paste("p=", round(p, 3), sep=""))))
+
+
+
+##individual pariwise Dij
+test<-DS_SPBTrigGate
+
+extract_dyads <- function(matrix_data) {
+  names <- rownames(matrix_data)
+  n <- length(names)
+  
+  dyads <- data.frame(
+    bird1 = character(),
+    bird2 = character(),
+    wins = numeric(),
+    losses = numeric(),
+    stringsAsFactors = FALSE
+  )
+  
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i != j) {
+        dyads <- rbind(dyads, data.frame(
+          bird1 = names[i],
+          bird2 = names[j],
+          wins = matrix_data[i, j],
+          losses = matrix_data[j, i],
+          stringsAsFactors = FALSE
+        ))
+      }
+    }
+  }
+  dyads$Dij <- (dyads$wins / (dyads$wins + dyads$losses))-(((dyads$wins / (dyads$wins + dyads$losses))-0.5)*(1/((dyads$wins + dyads$losses)+1)))
+  return(dyads)
+}
+
+indiv.dyad<-lapply(list_of_objects2, extract_dyads)
+
+process_dyad <- function(df) {
+  df %>%
+    filter(bird1 != bird2) %>%
+    rename(from = bird1, to = bird2, prop1 = Dij) %>%
+    left_join(
+      df %>%
+        rename(from = bird2, to = bird1, prop2 = Dij),
+      by = c("from", "to")
+    ) %>%
+    mutate(
+      bird1 = pmin(from, to),
+      bird2 = pmax(from, to),
+      prop_diff = prop1 - prop2
+    ) %>%
+    select(bird1, bird2, prop1, prop2, prop_diff) %>%
+    distinct()
+}
+
+dyadic_dom <- bind_rows(
+  (lapply(indiv.dyad, 
+          process_dyad)),
+  .id = "group")
+
+
+
+
+#CLEAN ME UP
+
+test<-subset(dyadic_dom, group=="DS_EAST_CAMP_SE")
+
+test2<-merge(test, IDS, by.x="bird1", by.y = "COMBO", all=T)
+names(test2)[names(test2) == 'PPO'] <- 'PPO1'
+
+test2<-merge(test2, IDS, by.x="bird2", by.y = "COMBO", all=T)
+names(test2)[names(test2) == 'PPO'] <- 'PPO2'
+test2<-subset(test2, GRP.x==GRP.y)
+
+ggplot(test2, aes(x=R_1.2, y=prop_diff))+
+  geom_point()
+unlist(unique(test2$bird2))
+
+test<-indiv.dyad[["DS_EAST_CAMP_SE"]]
+
+cleanup<-function(matrix){
+  matrix[upper.tri(matrix, diag= T)] <- NA
+  x<-as.data.frame(matrix)
+  
+  x<-as.data.frame(x)
+  #creates the winner ID column so I can make the dataframe long
+  x<-tibble::rownames_to_column(x, "BIRD1")
+  #unique total value of columns per matrix
+  N<-length(colnames(x))
+  #creates a unique dataframe that has a list of all interaction pairs (totals)
+  x<-pivot_longer(as.data.frame(x), 
+                  cols = c(2:N), 
+                  names_to = "BIRD2", 
+                  values_to = "Dyad_Slope")
+}
+
+indiv.dyad<-lapply(indiv.dyad, cleanup)
+indiv.dyad<-na.omit(indiv.dyad)
+
+test<-subset(indiv.dyad, group =="DS_EAST_CAMP_SE" | )
+
+
+indiv.dyad$group<-factor(indiv.dyad$group, levels = c("DS_E_Hay","DS_EAST_CAMP_SE",
+                                                      "DS_Hay_3W","DS_HAY1_N",
+                                                      "DS_LookoutSE","DS_NCoastSE",
+                                                      "DS_NPB NW","DS_NPB_E",
+                                                      "DS_NPB_S","DS_Rd_Flats_Swede_gate",
+                                                      "DS_RdFlatAnchorGate",
+                                                      "DS_ROAD_FLATS_SE","DS_SPB_N_CURVE",
+                                                      "DS_SPBTrigGate","DS_staff_3",
+                                                      "DS_SY1_C","DS_SY1_NE",
+                                                      "DS_SY1_NW","DS_W_camp_C",
+                                                      "DS_WEST_CAMP_NW"),
+                         labels = c("East Hay", "East Camp SE", 
+                                    "Hay 3W", "Hay 1N", 
+                                    "Lookout SE", "North Coast SE", 
+                                    "N. Punchbowl NW", "N. Punchbowl E", 
+                                    "N. Punchbowl S", "Road Flats: Swede gate",
+                                    "Road Flats: Parking", 
+                                    "Road Flats SE", "S. Punchbowl N", 
+                                    "S. Punchbowl: Trig gate", "Staff 3", 
+                                    "Stockyard 1 C", "Stockyard 1 NE", 
+                                    "Stockyard 1 NW", "West Camp C", 
+                                    "West Camp NW"))
+
+
+Relate2<-Relate2[,c(1:5,7)]
+names(Relate2)[names(Relate2)=="GRP2"]<-"group"
+names(Relate2)[names(Relate2)=="COMBO.x"]<-"BIRD1"
+names(Relate2)[names(Relate2)=="COMBO.y"]<-"BIRD2"
+
+test3<-subset(Relate2, group=="East Camp SE")
+test4<-subset(indiv.dyad, group=="East Camp SE")
+
+df3 = merge(indiv.dyad, Relate2, by.x=c("BIRD1", "BIRD2"), by.y=c("BIRD1", "BIRD2"))
+df3$inv<-abs(df3$Dyad_Slope)
+df3$SZN<-if_else(df3$group.x=="East Hay" | df3$group.x=="Lookout SE" | df3$group.x=="North Coast SE" | df3$group.x=="Road Flats: Swede gate" | df3$group.x=="Road Flats: Parking" | df3$group.x=="S. Punchbowl N" | df3$group.x=="S. Punchbowl: Trig gate" | df3$group.x=="Staff 3", 
+                 "SPring", 
+                 "Summer")
+
+df3<-df3 %>% #removes the unknown groups
+  group_by(group.x) %>%
+  filter(n() > 5)
+
+ggplot(df3, 
+       aes(R_1.2, inv))+
+  geom_point()+
+  geom_smooth(method="lm", se=T)+
+  theme(legend.position="none")+
+  coord_cartesian(ylim=c(0,1))+
+  ggthemes::theme_few()+
+  theme(legend.position="none")
+
+
+relatedness<-glmmTMB(inv~R_1.2+SZN+diag(1+R_1.2+SZN|group.x), 
+                     data=df3)
+
+performance::check_model(relatedness)
+
+summary(relatedness)
+
+Relate3<-Relate3%>%
+  group_by(GRP2)%>%
+  reframe(mean=mean(R_1.2), 
+          slope=Slopes, 
+          p=p)
+Relate3<-unique(Relate3)
+
+ggplot(Relate3, aes(mean, slope))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+Relate3$SZN<-if_else(Relate3$GRP2=="East Hay" | Relate3$GRP2=="Lookout SE" | Relate3$GRP2=="North Coast SE" | Relate3$GRP2=="Road Flats: Swede gate" | Relate3$GRP2=="Road Flats: Parking" | Relate3$GRP2=="S. Punchbowl N" | Relate3$GRP2=="S. Punchbowl: Trig gate" | Relate3$GRP2=="Staff 3", 
+                     "SPring", 
+                     "Summer")
+
+Relate3$inv<-abs(Relate3$slope)
+
+relatedness2<-glmmTMB(inv~mean+SZN,
+                      weights = 1/p,
+                      data=Relate3, 
+                      family=beta_family(link = "logit"))
+
+performance::check_model(relatedness2)
+
+summary(relatedness2)
+
+Relate3$SZN<-if_else(Relate3$GRP2=="East Hay" | Relate3$GRP2=="Lookout SE" | Relate3$GRP2=="North Coast SE" | Relate3$GRP2=="Road Flats: Swede gate" | Relate3$GRP2=="Road Flats: Parking" | Relate3$GRP2=="S. Punchbowl N" | Relate3$GRP2=="S. Punchbowl: Trig gate" | Relate3$GRP2=="Staff 3", 
+                     "SPring", 
+                     "Summer")
+
+Relate4<-Relate3
+
+oneway<-glmmTMB(R_1.2~Slopes*SZN, data = Relate4)
+performance::check_model(oneway)
+
+plot(ggeffects::ggpredict(oneway, 
+                          terms = "Slopes"))+
+  geom_point(data=Relate3, aes(y=R_1.2, x=Slopes))
+
+summary(oneway)
