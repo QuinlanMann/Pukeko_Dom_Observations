@@ -394,42 +394,77 @@ ggplot(linearity)+
                 label=paste("p=", round(`p-value`, 3), sep="")))
 ```
 
-```{r}
+```{r Beta parameters estimation function, echo=F}
+estBeta <- function(mu, sd) {
+  var <- sd^2
+  alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
+  beta <- alpha * (1 / mu - 1)
+  return(params = list(alpha = alpha, beta = beta))
+}
+```
+
+```{r fig.cap="David Score and Inbreeding coefficient", fig.height=6, echo=F}
 #pulling the data from Github
 #Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 #Doms<-read.csv(text=Doms)
 
-IDS<-na.omit(read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\ID.csv")[-c(3:6)])
+IDS<-na.omit(read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\ID.csv")[-c(4:6)])
 F_SCORE<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\f_score_prelim.csv")
 
 DF<-merge(David_Score, IDS, by.x = "ID", by.y = "COMBO", all=T, sort=F)
 DF<-merge(DF, F_SCORE, by = "PPO")
 
-ggplot(DF, aes(f_mean, DS), fill=Group)+
-  geom_point()+
-  geom_smooth(method="lm", se=F)+
-  scale_x_continuous(limits=c(0.05, 0.7))+
-  ggthemes::theme_few()
+DF<-DF[,c(1,3:5,12:13)][rep(seq_len(nrow(DF)), each = 100),]
 
+for(H in 1:nrow(DF)){
+  DF$RAND[H]<-rbeta(1, 
+        estBeta(DF$f_mean[H], DF$f_sd[H])[[1]], 
+        estBeta(DF$f_mean[H], DF$f_sd[H])[[2]])
+  }
+
+DF$ITER<-(c(1:100))     
+
+ggplot(subset(DF, ITER==1), aes(f_mean, DS, fill=as.factor(ITER)))+
+  geom_jitter()+
+  ggthemes::theme_few()+
+  geom_smooth(data=DF, 
+              aes(RAND, DS),
+              method="lm", 
+              color=alpha("blue", 0.1), se=T, alpha=0.01)+
+  geom_smooth(method="lm", color="black", se=F)+
+  #scale_x_continuous(limits = c(0.01,1))+
+  geom_jitter(color="black")+
+  theme(legend.position="none")
+```
+
+
+```{r fig.cap="CHECKING BETAS", fig.height=6, echo=F}
+ggplot(DF, aes(f_mean, RAND))+
+  geom_point(alpha=0.05, shape=16)+
+  geom_smooth(method="lm", se=T, size=1.5)+
+  geom_abline(slope=1, intercept=0, 
+              color="red", size=1, 
+              linetype="dashed")+
+  ggthemes::theme_few()
 ```
 
 ```{r}
 Relate<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\relatedness.csv")
 
 Relate<-Relate[,c(1,2,12)]
-Relate<-merge(Relate, IDS[c(1,3)], by.x = "ID1", by.y="PPO", all = T)
+Relate<-merge(Relate, IDS, by.x = "ID1", by.y="PPO", all = T)
 names(Relate)[names(Relate) == 'GRP'] <- 'GRP1'
-Relate<-merge(Relate, IDS[c(1,3)], by.x = "ID2", by.y="PPO", all = T)
+Relate<-merge(Relate, IDS, by.x = "ID2", by.y="PPO", all = T)
 names(Relate)[names(Relate) == 'GRP'] <- 'GRP2'
 
-Relate<-subset(Relate, GRP1==GRP2 & ID1!=ID2)
+Relate3<-subset(Relate, GRP1==GRP2 & ID1!=ID2)
 
-ggplot(Relate, aes(GRP1, R_1.2))+
+ggplot(Relate3, aes(GRP1, R_1.2))+
+  geom_boxplot()+
   geom_point()+
-  geom_boxplot()
-unique(Relate$GRP2)
+  ggthemes::theme_few()
 
-Relate$GRP2 <- factor(Relate$GRP2, levels = c("ECAMPSE",
+Relate3$GRP2 <- factor(Relate3$GRP2, levels = c("ECAMPSE",
                                                           "HAY3W",
                                                           "LOOKOUTSE","NCOASTSE",
                                                           "NPBNW","NPBE",
@@ -452,12 +487,92 @@ Relate$GRP2 <- factor(Relate$GRP2, levels = c("ECAMPSE",
                                        "Stockyard 1 NW", "West Camp C", 
                                        "West Camp NW"))
 
-Relate<-merge(Relate, slopes, by.x = "GRP2", by.y = "id", all=T)
+Relate3<-merge(Relate3, slopes, by.x = "GRP2", by.y = "id", all=T)
+```
 
-ggplot(Relate, aes(Slopes, R_1.2))+
-  geom_jitter(width=0.01)+
+
+```{r fig.cap="Relatedness and group slope"}
+ggplot(Relate3, aes(Slopes, R_1.2))+
+  geom_jitter(width=0.0)+
   geom_smooth(method="lm")+
-  scale_y_continuous(limits = c(0.05, 1))+
   ggthemes::theme_few()
+```
+
+```{r Dyadic Dom scores}
+
+extract_dyads <- function(matrix_data) {
+  names <- rownames(matrix_data)
+  n <- length(names)
+  
+  dyads <- data.frame(
+    bird1 = character(),
+    bird2 = character(),
+    wins = numeric(),
+    losses = numeric(),
+    stringsAsFactors = FALSE
+  )
+  
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i != j) {
+        dyads <- rbind(dyads, data.frame(
+          bird1 = names[i],
+          bird2 = names[j],
+          wins = matrix_data[i, j],
+          losses = matrix_data[j, i],
+          stringsAsFactors = FALSE
+        ))
+      }
+    }
+  }
+  dyads$Dij <- (dyads$wins / (dyads$wins + dyads$losses))-(((dyads$wins / (dyads$wins + dyads$losses))-0.5)*(1/((dyads$wins + dyads$losses)+1)))
+  dyads$Dij<-dyads$Dij
+  dyads$Diff <- dyads$Dij - (1-dyads$Dij)
+  return(dyads)
+}
+
+indiv.dyad<-lapply(list_of_objects2, extract_dyads)
+
+```
+
+```{r}
+matrix_maker2<-function(x){
+  # construct 0 matrix of correct dimensions with row and column names
+  myMat <- matrix(0, #filled with zeros
+                  length(sort(unique(unlist(x[1:2])))), #length of all unique bird name values in rows and columns
+                  length(sort(unique(unlist(x[1:2])))), #length of all unique bird name values in rows and columns
+                  dimnames = list(sort(unique(unlist(x[1:2]))), #naming rows and columns after all unique bird name values in dataframe
+                                  sort(unique(unlist(x[1:2])))))
+  # fill in the matrix with matrix indexing on row and column names
+  myMat[as.matrix(x[c("bird1", "bird2")])] <- x[["Diff"]]
+  #birds not included in any Dom related interactions are included as interacting with themselves in the dataset, and as such are included as 1 instance of interaction with themselves (impossible), this sets that value to a true zero
+  diag(myMat)<-0
+  return(myMat)
+}
+
+indiv.dyad<-lapply(indiv.dyad, matrix_maker2)
+```
+
+```{r cleanup}
+cleanup<-function(matrix){
+  matrix[upper.tri(matrix, diag= T)] <- NA
+  x<-as.data.frame(matrix)
+  
+  x<-as.data.frame(x)
+  #creates the winner ID column so I can make the dataframe long
+  x<-tibble::rownames_to_column(x, "BIRD1")
+  #unique total value of columns per matrix
+  N<-length(colnames(x))
+  #creates a unique dataframe that has a list of all interaction pairs (totals)
+  x<-pivot_longer(as.data.frame(x), 
+                  cols = c(2:N), 
+                  names_to = "BIRD2", 
+                  values_to = "Dyad_Slope")
+}
+
+indiv.dyad<-lapply(indiv.dyad, cleanup)
+indiv.dyad <- bind_rows(indiv.dyad, .id = "group")
+
+indiv.dyad$Dyad_Slope<-abs(indiv.dyad$Dyad_Slope)*-1
 ```
 
