@@ -41,6 +41,7 @@ library(EloRating)
 library(RCurl)
 library(kableExtra)
 library(knitr)
+library(glmmTMB)
 ```
 
 #**Introduction**
@@ -403,7 +404,7 @@ estBeta <- function(mu, sd) {
 }
 ```
 
-```{r fig.cap="David Score and Inbreeding coefficient", fig.height=6, echo=F}
+```{r fig.cap="David Score and Inbreeding coefficient", fig.height=4, echo=F}
 #pulling the data from Github
 #Doms<-getURL("https://raw.githubusercontent.com/QuinlanMann/Pukeko_Dom_Observations/main/Dom_Obs_Master.csv")
 #Doms<-read.csv(text=Doms)
@@ -422,7 +423,13 @@ for(H in 1:nrow(DF)){
         estBeta(DF$f_mean[H], DF$f_sd[H])[[2]])
   }
 
-DF$ITER<-(c(1:100))     
+DF$ITER<-(c(1:100))  
+
+slopes2<-DF%>%
+  group_by(ITER)%>%
+  summarize(
+    reg=lm(DS~RAND)[["coefficients"]][["RAND"]]
+  )
 
 ggplot(subset(DF, ITER==1), aes(f_mean, DS, fill=as.factor(ITER)))+
   geom_jitter()+
@@ -430,11 +437,12 @@ ggplot(subset(DF, ITER==1), aes(f_mean, DS, fill=as.factor(ITER)))+
   geom_smooth(data=DF, 
               aes(RAND, DS),
               method="lm", 
-              color=alpha("blue", 0.1), se=T, alpha=0.01)+
+              color=alpha("blue", 0.1), se=F, alpha=0.01)+
   geom_smooth(method="lm", color="black", se=F)+
   #scale_x_continuous(limits = c(0.01,1))+
   geom_jitter(color="black")+
-  theme(legend.position="none")
+  theme(legend.position="none")+
+  labs(y="David's Score", x="Inbreeding coefficient (F)")
 ```
 
 
@@ -459,11 +467,6 @@ names(Relate)[names(Relate) == 'GRP'] <- 'GRP2'
 
 Relate3<-subset(Relate, GRP1==GRP2 & ID1!=ID2)
 
-ggplot(Relate3, aes(GRP1, R_1.2))+
-  geom_boxplot()+
-  geom_point()+
-  ggthemes::theme_few()
-
 Relate3$GRP2 <- factor(Relate3$GRP2, levels = c("ECAMPSE",
                                                           "HAY3W",
                                                           "LOOKOUTSE","NCOASTSE",
@@ -487,6 +490,13 @@ Relate3$GRP2 <- factor(Relate3$GRP2, levels = c("ECAMPSE",
                                        "Stockyard 1 NW", "West Camp C", 
                                        "West Camp NW"))
 
+ggplot(Relate3, aes(GRP1, R_1.2))+
+  geom_boxplot()+
+  geom_point()+
+  ggthemes::theme_few()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(x="Breeding groups", y="Kinship Coefficient")
+
 Relate3<-merge(Relate3, slopes, by.x = "GRP2", by.y = "id", all=T)
 ```
 
@@ -495,7 +505,8 @@ Relate3<-merge(Relate3, slopes, by.x = "GRP2", by.y = "id", all=T)
 ggplot(Relate3, aes(Slopes, R_1.2))+
   geom_jitter(width=0.0)+
   geom_smooth(method="lm")+
-  ggthemes::theme_few()
+  ggthemes::theme_few()+
+  labs(x="Within group dominance hierarchy slopes", y="Kinship Coefficient")
 ```
 
 ```{r Dyadic Dom scores}
@@ -574,5 +585,67 @@ indiv.dyad<-lapply(indiv.dyad, cleanup)
 indiv.dyad <- bind_rows(indiv.dyad, .id = "group")
 
 indiv.dyad$Dyad_Slope<-abs(indiv.dyad$Dyad_Slope)*-1
+```
+
+```{r}
+indiv.dyad$group<-factor(indiv.dyad$group, levels = c("DS_E_Hay","DS_EAST_CAMP_SE",
+                                                      "DS_Hay_3W","DS_HAY1_N",
+                                                      "DS_LookoutSE","DS_NCoastSE",
+                                                      "DS_NPB NW","DS_NPB_E",
+                                                      "DS_NPB_S","DS_Rd_Flats_Swede_gate",
+                                                      "DS_RdFlatAnchorGate",
+                                                      "DS_ROAD_FLATS_SE","DS_SPB_N_CURVE",
+                                                      "DS_SPBTrigGate","DS_staff_3",
+                                                      "DS_SY1_C","DS_SY1_NE",
+                                                      "DS_SY1_NW","DS_W_camp_C",
+                                                      "DS_WEST_CAMP_NW"),
+                         labels = c("East Hay", "East Camp SE", 
+                                    "Hay 3W", "Hay 1N", 
+                                    "Lookout SE", "North Coast SE", 
+                                    "N. Punchbowl NW", "N. Punchbowl E", 
+                                    "N. Punchbowl S", "Road Flats: Swede gate",
+                                    "Road Flats: Parking", 
+                                    "Road Flats SE", "S. Punchbowl N", 
+                                    "S. Punchbowl: Trig gate", "Staff 3", 
+                                    "Stockyard 1 C", "Stockyard 1 NE", 
+                                    "Stockyard 1 NW", "West Camp C", 
+                                    "West Camp NW"))
+
+
+Relate2<-Relate3[,c(1:5,7)]
+names(Relate2)[names(Relate2)=="GRP2"]<-"group"
+names(Relate2)[names(Relate2)=="COMBO.x"]<-"BIRD1"
+names(Relate2)[names(Relate2)=="COMBO.y"]<-"BIRD2"
+
+Relate2 = merge(indiv.dyad, Relate2, by.x=c("BIRD1", "BIRD2"), by.y=c("BIRD1", "BIRD2"))
+Relate2$inv<-abs(Relate2$Dyad_Slope)
+Relate2$SZN<-if_else(Relate2$group.y=="East Hay" | Relate2$group.y=="Lookout SE" | Relate2$group.y=="North Coast SE" | Relate2$group.y=="Road Flats: Swede gate" | Relate2$group.y=="Road Flats: Parking" | Relate2$group.y=="S. Punchbowl N" | Relate2$group.y=="S. Punchbowl: Trig gate" | Relate2$group.y=="Staff 3", 
+                 "SPring", 
+                 "Summer")
+
+Relate2<-Relate2 %>% #removes the unknown groups
+  group_by(group.x) %>%
+  filter(n() > 5)
+
+ggplot(Relate2, 
+       aes(R_1.2, Dyad_Slope))+
+  geom_point()+
+  geom_smooth(method="lm", se=T)+
+  ggthemes::theme_few()+
+  theme(legend.position="none")+
+  labs(y="Dyadic dominance difference", x="Kinship Coefficient")
+
+relatedness<-glmmTMB(inv~R_1.2+SZN+(1|group.x), 
+                     data=Relate2)
+
+performance::check_model(relatedness)
+
+summary(relatedness)
+```
+
+```{r}
+relatedness<-glmmTMB(inv~R_1.2+SZN+(1|group.x), 
+                     data=Relate2)
+
 ```
 
