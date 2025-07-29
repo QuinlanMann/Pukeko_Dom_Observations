@@ -202,8 +202,8 @@ doms4<-doms4%>%
   group_by(Group, Dominant, Subordinate)%>%
   summarize(count=length(Interaction))
 
-df3<-DS(matrix_maker(doms4[,c(2:4)]))
-df2<-merge(df2, df3, by=c("ID"))
+indiv.relate<-DS(matrix_maker(doms4[,c(2:4)]))
+df2<-merge(df2, indiv.relate, by=c("ID"))
 
 ggplot(df2, aes(normDS.y, normDS.x, label=ID))+
   geom_text(check_overlap = T, hjust = 0, nudge_x = 0.05)+
@@ -468,25 +468,22 @@ indiv.dyad$group<-factor(indiv.dyad$group, levels = c("DS_E_Hay","DS_EAST_CAMP_S
                                     "West Camp NW"))
 
 
-Relate2<-Relate2[,c(1:5,7)]
+Relate2<-Relate3[,c(1:5,7)]
 names(Relate2)[names(Relate2)=="GRP2"]<-"group"
 names(Relate2)[names(Relate2)=="COMBO.x"]<-"BIRD1"
 names(Relate2)[names(Relate2)=="COMBO.y"]<-"BIRD2"
 
-test3<-subset(Relate2, group=="East Camp SE")
-test4<-subset(indiv.dyad, group=="East Camp SE")
-
-df3 = merge(indiv.dyad, Relate2, by.x=c("BIRD1", "BIRD2"), by.y=c("BIRD1", "BIRD2"))
-df3$inv<-abs(df3$Dyad_Slope)
-df3$SZN<-if_else(df3$group.x=="East Hay" | df3$group.x=="Lookout SE" | df3$group.x=="North Coast SE" | df3$group.x=="Road Flats: Swede gate" | df3$group.x=="Road Flats: Parking" | df3$group.x=="S. Punchbowl N" | df3$group.x=="S. Punchbowl: Trig gate" | df3$group.x=="Staff 3", 
+indiv.relate = merge(indiv.dyad, Relate2, by.x=c("BIRD1", "BIRD2"), by.y=c("BIRD1", "BIRD2"))
+indiv.relate$inv<-abs(indiv.relate$Dyad_Slope)
+indiv.relate$SZN<-if_else(indiv.relate$group.y=="East Hay" | indiv.relate$group.y=="Lookout SE" | indiv.relate$group.y=="North Coast SE" | indiv.relate$group.y=="Road Flats: Swede gate" | indiv.relate$group.y=="Road Flats: Parking" | indiv.relate$group.y=="S. Punchbowl N" | indiv.relate$group.y=="S. Punchbowl: Trig gate" | indiv.relate$group.y=="Staff 3", 
                  "SPring", 
                  "Summer")
 
-df3<-df3 %>% #removes the unknown groups
+indiv.relate<-indiv.relate %>% #removes the unknown groups
   group_by(group.x) %>%
   filter(n() > 5)
 
-ggplot(df3, 
+ggplot(indiv.relate, 
        aes(R_1.2, inv))+
   geom_point()+
   geom_smooth(method="lm", se=T)+
@@ -495,9 +492,9 @@ ggplot(df3,
   ggthemes::theme_few()+
   theme(legend.position="none")
 
-
-relatedness<-glmmTMB(inv~R_1.2+SZN+diag(1+R_1.2+SZN|group.x), 
-                     data=df3)
+library(glmmTMB)
+relatedness<-glmmTMB(slopes~R_1.2+SZN+diag(1+R_1.2+SZN|group.x), 
+                     data=Relate3)
 
 performance::check_model(relatedness)
 
@@ -520,26 +517,22 @@ Relate3$SZN<-if_else(Relate3$GRP2=="East Hay" | Relate3$GRP2=="Lookout SE" | Rel
 
 Relate3$inv<-abs(Relate3$slope)
 
-relatedness2<-glmmTMB(inv~mean+SZN,
-                      weights = 1/p,
-                      data=Relate3, 
-                      family=beta_family(link = "logit"))
+relatedness2<-glmmTMB(Slopes~R_1.2*SZN,
+                      data=Relate3)
 
 performance::check_model(relatedness2)
 
 summary(relatedness2)
 
-Relate3$SZN<-if_else(Relate3$GRP2=="East Hay" | Relate3$GRP2=="Lookout SE" | Relate3$GRP2=="North Coast SE" | Relate3$GRP2=="Road Flats: Swede gate" | Relate3$GRP2=="Road Flats: Parking" | Relate3$GRP2=="S. Punchbowl N" | Relate3$GRP2=="S. Punchbowl: Trig gate" | Relate3$GRP2=="Staff 3", 
-                     "SPring", 
-                     "Summer")
+plot(ggeffects::ggpredict(relatedness2, terms = "R_1.2"))+
+  geom_point(data = Relate3, aes(x=R_1.2, y=Slopes))
+plot(ggeffects::ggpredict(relatedness2, terms = "SZN"))
 
-Relate4<-Relate3
+slopes2<-DF%>%
+  group_by(ITER)%>%
+  summarize(
+    reg=lm(DS~RAND)[["coefficients"]][["RAND"]]
+  )
 
-oneway<-glmmTMB(R_1.2~Slopes*SZN, data = Relate4)
-performance::check_model(oneway)
 
-plot(ggeffects::ggpredict(oneway, 
-                          terms = "Slopes"))+
-  geom_point(data=Relate3, aes(y=R_1.2, x=Slopes))
-
-summary(oneway)
+  
