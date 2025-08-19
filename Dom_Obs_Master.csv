@@ -1700,8 +1700,8 @@ E_Hay,02-Nov,NOBA,BRNG,P
 E_Hay,02-Nov,NOBA,BRNG,B
 E_Hay,02-Nov,BRNG,NOBA,B
 staff_3,01-Mar,RBNR,WRBY,B
-staff_3,0-0, YYNY, YYNY,NA
-staff_3,0-0, NGYN, NGYN,NA
+staff_3,0-0,YYNY,YYNY,NA
+staff_3,0-0,NGYN,NGYN,NA
 staff_3,13-Feb,RBNR,WRGY,D
 Rd_Flats_Swede_gate,17-Jan,WGGG,RGGN,B
 Rd_Flats_Swede_gate,17-Jan,WGGG,BWBN,B
@@ -1805,12 +1805,12 @@ Rd_Flats_Swede_gate,20-Feb,RNBB,RGGN,D
 Rd_Flats_Swede_gate,20-Feb,RNBB,RGGN,B
 Rd_Flats_Swede_gate,20-Feb,RNBB,RGGN,B
 Rd_Flats_Swede_gate,20-Feb,RNBB,RGGN,B
-Rd_Flats_Swede_gate,23-1,WGGG,RGGN,B
-Rd_Flats_Swede_gate,23-1,BWBN,RGGN,D
-Rd_Flats_Swede_gate,23-1,WGGG,NOBA,B
-Rd_Flats_Swede_gate,23-1,WGGG,BWBN,B
-Rd_Flats_Swede_gate,23-1,WGGG,NOBA,B
-Rd_Flats_Swede_gate,23-1,WGGG,NOBA,D
-Rd_Flats_Swede_gate,23-1,WGGG,NOBA,P
-Rd_Flats_Swede_gate,23-1,WGGG,RNBB,D
-Rd_Flats_Swede_gate,23-2,RGGN,GBYW,D
+Rd_Flats_Swede_gate,23-Jan,WGGG,RGGN,B
+Rd_Flats_Swede_gate,23-Jan,BWBN,RGGN,D
+Rd_Flats_Swede_gate,23-Jan,WGGG,NOBA,B
+Rd_Flats_Swede_gate,23-Jan,WGGG,BWBN,B
+Rd_Flats_Swede_gate,23-Jan,WGGG,NOBA,B
+Rd_Flats_Swede_gate,23-Jan,WGGG,NOBA,D
+Rd_Flats_Swede_gate,23-Jan,WGGG,NOBA,P
+Rd_Flats_Swede_gate,23-Jan,WGGG,RNBB,D
+Rd_Flats_Swede_gate,23-Feb,RGGN,GBYW,D
