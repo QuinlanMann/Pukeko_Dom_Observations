@@ -534,7 +534,11 @@ slopes2<-DF%>%
     reg=lm(DS~RAND)[["coefficients"]][["RAND"]]
   )
 
+dom_sum
+summary(Doms)
 
+Doms$ï..Group
+# Rename 'old_name' to 'new_name'
+colnames(Doms)[colnames(Doms) == "ï..Group"] <- "Group"
 
-
-  
+IDS<-na.omit(read.csv("C:\\Users\\quinl\\Downloads\\ID.csv"))

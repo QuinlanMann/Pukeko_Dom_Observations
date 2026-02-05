@@ -62,6 +62,8 @@ Doms<-read.csv(text=Doms)
 #Doms<-read.csv("C:\\Users\\quinl\\Desktop\\Grad School\\PUKEKO\\Pukeko_Dom_Observations\\Dom_Obs_Master.csv")
 
 Doms<-Doms[!Doms$Interaction %in% "X",]
+colnames(Doms)[colnames(Doms) == "ï..Group"] <- "Group"
+
 #summarizing counts of interactions between individual birds within groups
 Doms<-Doms%>%
   group_by(Group, Dominant, Subordinate)%>%
