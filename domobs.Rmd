@@ -42,6 +42,8 @@ library(RCurl)
 library(kableExtra)
 library(knitr)
 library(glmmTMB)
+library(lme4)
+library(lmerTest)
 ```
 
 #**Introduction**
@@ -430,50 +432,63 @@ DF$ITER<-(c(1:1000))
 slopes2<-subset(DF, SEX!="")%>%
   group_by(ITER)%>%
   summarize(
-    int=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[1]],
-    fmean=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[2]], 
-    SexM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[3]], 
-    fmeanM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[4]]
-  )
+    int=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[1]],
+    fmean=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[2]], 
+    SexM=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[3]], 
+    fmeanM=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[4]], 
+    intse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[5]],
+    fmeanse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[6]], 
+    SexMse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[7]], 
+    fmeanMse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[8]],
+    intdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[9]],
+    fmeandf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[10]], 
+    SexMdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[11]], 
+    fmeanMdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[12]]
+    )
 
-quantile(slopes2$fmean, probs = c(0.975, 0.95,0.025))
-length(which(slopes2$fmean>0))/length((slopes2$fmean))
-
-quantile(slopes2$SexM, probs = c(0.975, 0.95, 0.025))
-length(which(slopes2$SexM>0))/length(slopes2$SexM)
-
-quantile(slopes2$fmeanM, probs = c(0.975, 0.95, 0.025))
-length(which(slopes2$fmeanM>0))/length(slopes2$fmeanM)
-       
-ggplot(subset(DF, ITER==1), aes(f_mean, DS, fill=as.factor(ITER)))+
+ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
   geom_jitter()+
   ggthemes::theme_few()+
-  geom_smooth(data=DF, 
+  geom_smooth(data=subset(DF, SEX != ""), 
               aes(RAND, DS),
               method="lm", 
-              color=alpha("blue", 0.1), se=F, alpha=0.01)+
-  geom_smooth(method="lm", color="black", se=F)+
+              color=alpha("grey70", 0.1), se=F, alpha=0.01)+
+  geom_smooth(method="lm", color="black", se=F, linetype = "solid")+
   #scale_x_continuous(limits = c(0.01,1))+
   geom_jitter(color="black")+
   theme(legend.position="none")+
-  #facet_grid(~SEX)+
+  facet_grid(~SEX)+
   labs(y="David's Score", x="Inbreeding coefficient (F)")
 ```
 
 ```{r}
-ggplot(subset(DF, ITER==1), aes(f_mean, good_ranks, fill=as.factor(ITER)))+
-  geom_point()+
+ggplot(subset(DF, ITER==1 & SEX!=""), aes(f_mean, good_ranks, fill=as.factor(ITER)))+
   ggthemes::theme_few()+
-  geom_smooth(data=DF, 
+  geom_smooth(data=subset(DF, SEX != ""), 
               aes(RAND, good_ranks),
               method="lm", 
-              color=alpha("blue", 0.1), se=F, alpha=0.01)+
+              color=alpha("grey70", 0.1), se=F, alpha=0.01)+
+  geom_smooth(method="lm", color="black", se=F)+
+  #scale_x_continuous(limits = c(0.01,1))+
+  geom_point(color="black")+
+  theme(legend.position="none")+
+  facet_grid(~SEX)+
+  labs(y="Within Group Rank", x="Inbreeding coefficient (F)")
+```
+
+```{r}
+ggplot(subset(DF, ITER==1 & SEX!=""), aes(f_mean, normDS, fill=as.factor(ITER)))+
+  ggthemes::theme_few()+
+  geom_smooth(data=subset(DF, SEX != ""), 
+              aes(RAND, normDS),
+              method="lm", 
+              color=alpha("grey70", 0.1), se=F, alpha=0.01)+
   geom_smooth(method="lm", color="black", se=F)+
   #scale_x_continuous(limits = c(0.01,1))+
   geom_jitter(color="black")+
   theme(legend.position="none")+
   facet_grid(~SEX)+
-  labs(y="Within Group Rank", x="Inbreeding coefficient (F)")
+  labs(y="Normalized David's Score", x="Inbreeding coefficient (F)")
 ```
 
 

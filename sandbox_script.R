@@ -548,18 +548,71 @@ IDS<-na.omit(read.csv("C:\\Users\\quinl\\Downloads\\ID.csv"))
 test3<-glmmTMB(DS~f_mean*SEX+(1|Group), 
                data=subset(DF, SEX!=""))
 
-test3[["coef"]]
-fixef(test3)[["cond"]][[2]]
+summary(test3)[["cond"]][[1]]
+(test3)
+summary(test3)$coefficients$cond$`Str. Error`
+str(test3)
 
 pp<-subset(DF, SEX=="F" && SEX=="M")
 
 unique(pp$SEX)
 
-slopes2<-subset(DF, SEX!="")%>%
-  group_by(ITER)%>%
+install.packages("lmerTest")
+library(lme4)
+library(lmerTest)
+
+
+summary(lmer(DS~RAND*SEX+(1|Group), data = DF),
+        ddf = c("Satterthwaite"))
+
+pp2<-summary(lmer(DS~RAND*SEX+(1|Group), data = subset(pp, SEX!="")))
+fixef(lmer(DS~RAND*SEX+(1|Group), data = DF))[[5]][[1]]
+summary(pp2)[["coefficients"]][[1]]
+pp<-subset(DF, ITER==1)
+
+slopes2<-subset(pp, SEX!="")%>%
   summarize(
-    int=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[1]],
-    fmean=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[2]], 
-    SexM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[3]], 
-    fmeanM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[4]]
-  )
+    int=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[1]],
+    fmean=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[2]], 
+    SexM=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[3]], 
+    fmeanM=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[4]], 
+    intse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[5]],
+    fmeanse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[6]], 
+    SexMse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[7]], 
+    fmeanMse=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[8]],
+    intdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[9]],
+    fmeandf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[10]], 
+    SexMdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[11]], 
+    fmeanMdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[12]]
+    )
+
+
+intse=summary(glmmTMB(DS~RAND*SEX+(1|Group)))[["coefficients"]][["cond"]][[5]],
+fmeanse=summary(glmmTMB(DS~RAND*SEX+(1|Group)))[["coefficients"]][["cond"]][[6]],
+SexMse=summary(glmmTMB(DS~RAND*SEX+(1|Group)))[["coefficients"]][["cond"]][[7]],
+fmeanMse=summary(glmmTMB(DS~RAND*SEX+(1|Group)))[["coefficients"]][["cond"]][[8]]
+
+install.packages("rbmi")
+library(rbmi)
+vignette(topic = "quickstart", package = "rbmi")
+
+rbmi::rubin_rules(slopes2$fmean, slopes2$fmeanse)
+rubin_rules(slopes2$fmean, slopes2$fmeanse)
+
+ggplot(subset(DF, ITER==1 & SEX!=""), aes(f_mean, DS, fill=as.factor(ITER)))+
+  ggthemes::theme_few()+
+  geom_smooth(data=subset(DF, SEX != ""), 
+              aes(RAND, DS),
+              method="lm", 
+              color=alpha("grey70", 0.1), se=F, alpha=0.01)+
+  geom_smooth(method="lm", color="black", se=F)+
+  #scale_x_continuous(limits = c(0.01,1))+
+  geom_jitter(color="black")+
+  theme(legend.position="none")+
+  facet_wrap(~Group)+
+  labs(y="Within Group Rank", x="Inbreeding coefficient (F)")
+
+?estBeta
+??estBeta
+butt<-estBeta(DF$f_mean, DF$f_sd)
+view(butt)
