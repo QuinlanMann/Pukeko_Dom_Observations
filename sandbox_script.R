@@ -542,3 +542,24 @@ Doms$ï..Group
 colnames(Doms)[colnames(Doms) == "ï..Group"] <- "Group"
 
 IDS<-na.omit(read.csv("C:\\Users\\quinl\\Downloads\\ID.csv"))
+
+
+
+test3<-glmmTMB(DS~f_mean*SEX+(1|Group), 
+               data=subset(DF, SEX!=""))
+
+test3[["coef"]]
+fixef(test3)[["cond"]][[2]]
+
+pp<-subset(DF, SEX=="F" && SEX=="M")
+
+unique(pp$SEX)
+
+slopes2<-subset(DF, SEX!="")%>%
+  group_by(ITER)%>%
+  summarize(
+    int=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[1]],
+    fmean=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[2]], 
+    SexM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[3]], 
+    fmeanM=fixef(glmmTMB(DS~RAND*SEX+(1|Group)))[["cond"]][[4]]
+  )
