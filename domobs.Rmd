@@ -446,6 +446,52 @@ slopes2<-subset(DF, SEX!="")%>%
     fmeanMdf=summary(lmer(DS~RAND*SEX+(1|Group)))[["coefficients"]][[12]]
     )
 
+```
+
+
+```{r}
+
+#Rubin's Rule for pooling estimates from multiple imputation 
+#for inbreeding coefficient
+theta_fmean<-mean(slopes2$fmean)
+Wbar_fmean<-mean((slopes2$fmeanse)^2)
+B_fmean<-(1/(length(slopes2$fmean)-1))*sum((slopes2$fmean-theta_fmean)^2)
+T_fmean<-Wbar_fmean+(1+1/length(slopes2$fmean))*B_fmean
+se_fmean<-sqrt(T_fmean)
+wald_fmean<-theta_fmean^2/se_fmean
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_fmean
+pf(wald_fmean, df1=1, df2=70, lower.tail = FALSE)
+
+#for Sex
+theta_SexM<-mean(slopes2$SexM)
+Wbar_SexM<-mean((slopes2$SexMse)^2)
+B_SexM<-(1/(length(slopes2$SexM)-1))*sum((slopes2$SexM-theta_SexM)^2)
+T_SexM<-Wbar_SexM+(1+1/length(slopes2$SexM))*B_SexM
+se_SexM<-sqrt(T_SexM)
+wald_SexM<-theta_SexM^2/se_SexM
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_SexM
+pf(wald_SexM, df1=1, df2=70, lower.tail = FALSE)
+
+#for inbreeding coefficient * sex
+theta_fmeanM<-mean(slopes2$fmeanM)
+Wbar_fmeanM<-mean((slopes2$fmeanMse)^2)
+B_fmeanM<-(1/(length(slopes2$fmeanM)-1))*sum((slopes2$fmeanM-theta_fmeanM)^2)
+T_fmeanM<-Wbar_fmeanM+(1+1/length(slopes2$fmeanM))*B_fmeanM
+se_fmeanM<-sqrt(T_fmeanM)
+wald_fmeanM<-theta_fmeanM^2/se_fmeanM
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_fmeanM
+pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)
+
+```
+
+
+```{r}
 ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
   geom_jitter()+
   ggthemes::theme_few()+
@@ -457,8 +503,64 @@ ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
   #scale_x_continuous(limits = c(0.01,1))+
   geom_jitter(color="black")+
   theme(legend.position="none")+
-  facet_grid(~SEX)+
+  #facet_grid(~SEX)+
   labs(y="David's Score", x="Inbreeding coefficient (F)")
+```
+
+```{r}
+slopes3<-subset(DF, SEX!="")%>%
+  group_by(ITER)%>%
+  summarize(
+    int=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[1]],
+    fmean=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[2]], 
+    SexM=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[3]], 
+    fmeanM=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[4]], 
+    intse=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[5]],
+    fmeanse=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[6]], 
+    SexMse=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[7]], 
+    fmeanMse=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[8]],
+    intdf=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[9]],
+    fmeandf=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[10]], 
+    SexMdf=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[11]], 
+    fmeanMdf=summary(lmer(good_ranks~RAND*SEX+(1|Group)))[["coefficients"]][[12]]
+  )
+
+#Rubin's Rule for pooling estimates from multiple imputation 
+#for inbreeding coefficient
+theta_fmean<-mean(slopes3$fmean)
+Wbar_fmean<-mean((slopes3$fmeanse)^2)
+B_fmean<-(1/(length(slopes3$fmean)-1))*sum((slopes3$fmean-theta_fmean)^2)
+T_fmean<-Wbar_fmean+(1+1/length(slopes3$fmean))*B_fmean
+se_fmean<-sqrt(T_fmean)
+wald_fmean<-theta_fmean^2/se_fmean
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_fmean
+pf(wald_fmean, df1=1, df2=70, lower.tail = FALSE)
+
+#for Sex
+theta_SexM<-mean(slopes3$SexM)
+Wbar_SexM<-mean((slopes3$SexMse)^2)
+B_SexM<-(1/(length(slopes3$SexM)-1))*sum((slopes3$SexM-theta_SexM)^2)
+T_SexM<-Wbar_SexM+(1+1/length(slopes3$SexM))*B_SexM
+se_SexM<-sqrt(T_SexM)
+wald_SexM<-theta_SexM^2/se_SexM
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_SexM
+pf(wald_SexM, df1=1, df2=70, lower.tail = FALSE)
+
+#for inbreeding coefficient * sex
+theta_fmeanM<-mean(slopes3$fmeanM)
+Wbar_fmeanM<-mean((slopes3$fmeanMse)^2)
+B_fmeanM<-(1/(length(slopes3$fmeanM)-1))*sum((slopes3$fmeanM-theta_fmeanM)^2)
+T_fmeanM<-Wbar_fmeanM+(1+1/length(slopes3$fmeanM))*B_fmeanM
+se_fmeanM<-sqrt(T_fmeanM)
+wald_fmeanM<-theta_fmeanM^2/se_fmeanM
+
+qf(p=.05, df1=1, df2=70, lower.tail=FALSE)
+wald_fmeanM
+pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)
 ```
 
 ```{r}
@@ -489,6 +591,35 @@ ggplot(subset(DF, ITER==1 & SEX!=""), aes(f_mean, normDS, fill=as.factor(ITER)))
   theme(legend.position="none")+
   facet_grid(~SEX)+
   labs(y="Normalized David's Score", x="Inbreeding coefficient (F)")
+```
+
+```{r}
+DF2 <- subset(DF, ITER==1)
+DF2 <- droplevels(DF2)
+DF2 <- split(DF2, list(DF2$Group,DF2$SEX))
+DF2 <- DF2[sapply(DF2, function(x) dim(x)[1]) > 0]
+DF2 <- lapply(DF2, function(x) 
+  lm(normDS~good_ranks, data = x)[["coefficients"]][[2]])
+DF2 <- as.data.frame(DF2)
+DF2 <- pivot_longer(DF2, cols = everything())
+
+#define function to extract n characters starting from end
+substr_end <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+#extract 3 characters starting from end 
+DF2$sex <- substr_end(DF2$name, 1)
+DF2 <- DF2 %>%
+  mutate(GRP = substr(name, 1, nchar(name) - 1))
+DF2 <-subset(DF2, sex !=".")
+
+ggplot(data=DF2, aes(sex, value, fill=sex))+
+  geom_boxplot()+
+  geom_line(aes(group=GRP), linetype=2)+
+  geom_point()+
+  ggthemes::theme_few()+
+  labs(y="Dominance Slope", x="Sex", fill="Sex")
 ```
 
 
