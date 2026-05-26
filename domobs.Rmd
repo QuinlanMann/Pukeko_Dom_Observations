@@ -24,7 +24,7 @@ header-includes:
   - \AtBeginEnvironment{tabular}{\singlespacing}
   - \AtBeginEnvironment{lltable}{\singlespacing}
   - \AtBeginEnvironment{tablenotes}{\doublespacing}
-linestretch: 1
+linestretch: 2
 always_allow_html: true
 ---
 
@@ -48,7 +48,7 @@ library(lmerTest)
 
 # **Abstract**
 
-Inbreeding has been shown to lead to marked decreases in fitness across many metrics, from egg hatching success, immune response, to competitive ability. Pukeko (Porphyrio melanotus melanotus) are a subspecies of rail that joint lays, forms clear breeding groups, and will readily inbreed in parts of their range, likely due to habitat saturation. Access to breeding is limited (especially among females) by their dominance rank within their groups. We therefore hypothesized that outbred birds will have greater reproductive success than inbred birds. To explore the impacts of inbreeding on dominance rank, we therefore predict that we will see outbred birds achieve higher dominance scores than inbred birds. We color banded most birds in these groups and collected a blood sample. We collected 5 hours of video per group and . We used these scores to calculate David’s scores for each bird. We then used PCR to amplify 13 microsatellite loci for each individual bird, and used the fragment sizes to calculate a measure of inbreeding within EMIBD9. We then ran a linear mixed effects model to determine the impacts of inbreeding and sex on dominance scores. We simulated confidence intervals from the standard deviation in our inbreeding coefficient estimates. We see that higher degrees of inbreeding leads to lower dominance scores and ranks. We see that while there is no difference in dominance ranks between males and females, we see that the inbreeding impacts females within a group more strongly than it impacts males. This may have strong implications for group longevity, if more outbred birds are breeding, then that may slow the accumulation of deleterious alleles that often accompanies inbreeding.
+Inbreeding has been shown to lead to marked decreases in fitness across many metrics, from egg hatching success, immune response, to competitive ability. Pukeko (*Porphyrio melanotus melanotus*) are a subspecies of rail that joint lays, forms clear breeding groups, and will readily inbreed in parts of their range, likely due to habitat saturation. Access to breeding is limited (especially among females) by their dominance rank within their groups. We therefore hypothesized that outbred birds will have greater reproductive success than inbred birds. To explore the impacts of inbreeding on dominance rank, we therefore predict that we will see outbred birds achieve higher dominance scores than inbred birds. We color banded most birds in these groups and collected a blood sample. We collected 5 hours of video per group and . We used these scores to calculate David’s scores for each bird. We then used PCR to amplify 13 microsatellite loci for each individual bird, and used the fragment sizes to calculate a measure of inbreeding within EMIBD9. We then ran a linear mixed effects model to determine the impacts of inbreeding and sex on dominance scores. We simulated confidence intervals from the standard deviation in our inbreeding coefficient estimates. We see that higher degrees of inbreeding leads to lower dominance scores and ranks. We see that while there is no difference in dominance ranks between males and females, we see that the inbreeding impacts females within a group more strongly than it impacts males. This may have strong implications for group longevity, if more outbred birds are breeding, then that may slow the accumulation of deleterious alleles that often accompanies inbreeding.
 
 # **Keywords**
 
@@ -442,7 +442,7 @@ estBeta <- function(mu, sd) {
 #Doms<-read.csv(text=Doms)
 
 IDS<-na.omit(read.csv("C:\\Users\\quinl\\Downloads\\ID.csv"))
-F_SCORE<-read.csv("E:\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\f_score_prelim.csv")
+F_SCORE<-read.csv("E:\\quinl\\Desktop\\Grad School\\PUKEKO\\genetic data\\f_score_prelim2.csv")
 
 DF<-merge(David_Score, IDS, by.x = "ID", by.y = "COMBO", all=T, sort=F)
 DF<-merge(DF, F_SCORE, by = "PPO")
@@ -517,7 +517,6 @@ pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)
 ```
 
 David's score was negatively impacted by inbreeding coefficients overall (Fig. 1, `r wald_fmeanM`, `r pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)`). David's score was not impacted by sex (`r wald_SexM`, `r pf(wald_SexM, df1=1, df2=70, lower.tail = FALSE)`), but there was a significant interaction between sex and inbreeding (Fig. 2, `r wald_fmeanM`, `r pf(wald_fmeanM, df1=1, df2=70, lower.tail=F)`).
-
 
 ```{r fig.cap="David's Score v Inbreeding Coeff.", fig.height=4, echo=F}
 ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
@@ -594,7 +593,6 @@ pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)
 
 Dominance rank within group was negatively impacted by inbreeding coefficients overall (`r wald_fmeanM`, `r pf(wald_fmeanM, df1=1, df2=70, lower.tail = FALSE)`).Dominance rank within group was not impacted by sex (`r wald_SexM`, `r pf(wald_SexM, df1=1, df2=70, lower.tail = FALSE)`), but there was a non-significant interaction between sex and inbreeding (Fig. 3, `r wald_fmeanM`, `r pf(wald_fmeanM, df1=1, df2=70, lower.tail=F)`).
 
-
 ```{r fig.cap= "David's Score v Inbreeding Coeff separated by sex", fig.height=4, echo=F }
 ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
   geom_jitter()+
@@ -610,7 +608,6 @@ ggplot(subset(DF, ITER==1 & SEX != ""), aes(f_mean, DS, fill=as.factor(ITER)))+
   facet_grid(~SEX)+
   labs(y="David's Score", x="Inbreeding coefficient (F)")
 ```
-
 
 ```{r fig.cap="Dominance rank v Inbreeding Coeff separated by sex", fig.height=4, echo=F }
 ggplot(subset(DF, ITER==1 & SEX!=""), aes(f_mean, good_ranks, fill=as.factor(ITER)))+
@@ -859,3 +856,29 @@ relatedness<-glmmTMB(inv~R_1.2+SZN+(1|group.x),
                      data=Relate2)
 
 ```
+
+# DRAFT DISCUSSION:
+
+We hypothesized that outbred birds would have greater reproductive success than inbred birds, and predicted that we would see outbred birds achieve higher dominance scores than inbred birds. We saw that this was true, with david’s scores decreasing as inbreeding coefficients increased, and ranks increasing as inbreeding increased. While we made no predictions regarding sex, we saw that this trend was much more clearly seen in females compared to male. Females had a greater decrease in David’s scores as inbreeding coefficients increased compared to males. Similarly, we saw a greater increase in within group ranks as inbreeding coefficients increased in females compared to males. We also saw no consistent differences in dominance hierarchies between males and females.
+
+-   Inbreeding is bad -\>
+
+-               Inbreeding can have different sex effects: Chickens, C. ramanei
+
+-   females have more reproductive skew -\>
+
+-               Jamieson 1999, Lambert et al 1994?
+
+-   females need to get to the top of the dominance -\>
+
+-               Jamieson 1997, Lambert et al . 1994, Vehnrecamp & Quinn 2004
+
+-   will use every benefit they can (greater heterozygosity?) -\>
+
+-   may slow the accumulation of deleterious alleles
+
+In pukeko it has been shown that dominant females are the ones who produce the majority of the clutch, while dominant males are not more likely to sire offspring than subordinates (Lambert et al. 1994). It has also been seen that there is a high degree of reproductive skew in females compared to males in nearby populations (Jamieson 1997). This highlights the differing selective pressures that may help to contextualize and support our results. Though our work did not find that female dominance hierarchies were consistently different than males. It is therefore unlikely that our results are an artifact of dominance scores differing between the two sexes.
+
+Our results are similar to a study showing that the disparity in social dominance between inbred males and outbred males decreases with age in chickens (*Gallus gallus domesticus*; Craig & Baruth 1965). We cannot know the ages of most of our birds, as they are most often wild captured as adults. So this may explain the fact that we see dominance hierarchies clearly impacted in females, but not males. The age of males may therefore confound any trends we would see in that sex, and we would be unable to pick up on them with the data we have. Future work would be needed following known birds over multiple years to tease this apart. Given the data were collected at the beginning of the establishment of this field site, and after a long (3+year) gap, we do not have the resolution to tease this apart currently.
+
+Overall, these results show that differing selection pressures in males and females may result in differing outcomes in dominance hierarchies. Specifically that females are impacted more by inbreeding as they need to achieve higher dominance status compared to males. Our work is also important as it adds to the body of literature showing the impacts of inbreeding on behaviour as opposed to more direct fitness metrics. Lastly our work provides one possible mechanism by which pukeko may maintain genetic diversity despite persistent in breeding, leading to
